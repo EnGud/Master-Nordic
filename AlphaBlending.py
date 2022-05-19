@@ -71,7 +71,7 @@ class AlphaOperations:
         BGSize = PictureBG.size 
         FG_X_Size, FG_Y_Size, BG_X_Size, BG_Y_Size = (FGSize[0]-1), (FGSize[1]-1), (BGSize[0]-1), (BGSize[1]-1)
 
-  #      BitDepthRed, BitDepthGreen, BitDepthBlue = 
+  #      BitDepthRed, BitDepthGreen, BitDepthBlue
 
 
         ArrayedForeground = np.asarray(PictureFG)
@@ -79,7 +79,7 @@ class AlphaOperations:
         ArrayedBackground = np.asarray(PictureBG)
         #LineBackground = ArrayedBackground[CurrentY]
 
-        Output = np.zeros((1, BG_X_Size, 4), dtype=np.uint16)
+        Output = np.zeros((1, BG_X_Size, 4), dtype=np.uint8)
  
 
         #Flagging-system
@@ -91,7 +91,6 @@ class AlphaOperations:
         OperationsCounter.ApplyAlphaInit =+ 1
         #Iterate over each pixel, each channel, applying the alpha
         #Bedre å hente ut arrayene til 1D array, istedenfor søk hver iterasjon? 
-
 
         #ApplyAlpha for hver kanal, R G B.
 
