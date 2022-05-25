@@ -1,13 +1,19 @@
 from turtle import delay
+from webbrowser import Opera
 import AlphaBlending, AlphaMasking
 from PIL import Image
 import numpy as np
+import OperationsCounter
 
 #Bilde =[0]*600
 Bilde = np.zeros((800, 600, 3), dtype=np.uint8)
 BildeMask = np.zeros((800, 600, 3), dtype=np.uint8)
 TestAlphaBlending = AlphaBlending
 
+#Målinger
+#Ysize=600
+HistoAlpha = np.zeros(600)
+HistoMask = np.zeros(600)
 
 #Init sizes
 
@@ -37,10 +43,29 @@ TestAlphaBlending.AlphaOperations.CheckAlpha(BufferedPicture1)
 #samme, men for BG:
 TestAlphaBlending.AlphaOperations.CheckAlpha(BufferedPicture2)
 
+#Individual Alpha Test
+#for CurrentY in range (600):
+#    Bilde = TestAlphaBlending.AlphaOperations.ApplyAlpha(BufferedPicture1, BufferedPicture2, CurrentY, 'Over')
+#    OutputBuffer[CurrentY] = Bilde
 
 for CurrentY in range (600):
+    #AlphaTest
     Bilde = TestAlphaBlending.AlphaOperations.ApplyAlpha(BufferedPicture1, BufferedPicture2, CurrentY, 'Over')
     OutputBuffer[CurrentY] = Bilde
+
+    HistoAlpha[CurrentY] = OperationsCounter.ApplyAlpha
+
+    #MaskTest
+    BildeMask = AlphaMasking.MaskingOperations.MaskAllChannels(BufferedPicture1, BufferedPicture2, BufferedMask, CurrentY)
+    OutputBuffer[CurrentY] = Bilde
+
+    HistoMask[CurrentY] = OperationsCounter.ApplyMask
+
+
+    
+
+
+
 
 print(OutputBuffer.shape)
 
@@ -52,9 +77,11 @@ Test = Image.fromarray(OutputBuffer)
 #Stasjonær
 Test.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test.bmp")
 
-for CurrentY in range (600):
-    BildeMask = AlphaMasking.MaskingOperations.MaskAllChannels(BufferedPicture1, BufferedPicture2, BufferedMask, CurrentY)
-    OutputBuffer[CurrentY] = Bilde
+#Individual Mask test
+#for CurrentY in range (600):
+#    BildeMask = AlphaMasking.MaskingOperations.MaskAllChannels(BufferedPicture1, BufferedPicture2, BufferedMask, CurrentY)
+#    OutputBuffer[CurrentY] = Bilde
+
 
 TestMask = Image.fromarray(OutputBuffer)
 TestMask.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking.bmp")
