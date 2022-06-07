@@ -4,6 +4,7 @@ import AlphaBlending, AlphaMasking
 from PIL import Image
 import numpy as np
 import OperationsCounter
+from OperationsCounter import OperationsCounter
 
 #Bilde =[0]*600
 Bilde = np.zeros((800, 600, 3), dtype=np.uint8)
@@ -52,8 +53,9 @@ for CurrentY in range (600):
     #AlphaTest
     Bilde = TestAlphaBlending.AlphaOperations.ApplyAlpha(BufferedPicture1, BufferedPicture2, CurrentY, 'Over')
     OutputBuffer[CurrentY] = Bilde
-
-    HistoAlpha[CurrentY] = OperationsCounter.ApplyAlpha
+    
+    Test = OperationsCounter.ApplyAlphaOperation
+    HistoAlpha[CurrentY] = Test
 
     #MaskTest
     BildeMask = AlphaMasking.MaskingOperations.MaskAllChannels(BufferedPicture1, BufferedPicture2, BufferedMask, CurrentY)

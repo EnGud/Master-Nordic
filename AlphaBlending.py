@@ -65,7 +65,7 @@ class AlphaOperations:
 
 
     #Input foreground, background
-    def ApplyAlpha(PictureFG, PictureBG, CurrentY, operatorIn):
+    def ApplyAlpha(PictureFG, PictureBG, CurrentY, operatorIn, OperationsCounter):
         #Setups local variables etc.
         FGSize = PictureFG.size 
         BGSize = PictureBG.size 
