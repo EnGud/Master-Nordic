@@ -10,6 +10,10 @@ from OperationsCounter import OperationsCounter
 Bilde = np.zeros((800, 600, 3), dtype=np.uint8)
 BildeMask = np.zeros((800, 600, 3), dtype=np.uint8)
 TestAlphaBlending = AlphaBlending
+TestAlphaMaskin = AlphaMasking
+
+TestObject = OperationsCounter
+
 
 #Målinger
 #Ysize=600
@@ -51,14 +55,14 @@ TestAlphaBlending.AlphaOperations.CheckAlpha(BufferedPicture2)
 
 for CurrentY in range (600):
     #AlphaTest
-    Bilde = TestAlphaBlending.AlphaOperations.ApplyAlpha(BufferedPicture1, BufferedPicture2, CurrentY, 'Over')
+    Bilde = TestAlphaBlending.AlphaOperations.ApplyAlpha(BufferedPicture1, BufferedPicture2, CurrentY, 'Over', TestObject)
     OutputBuffer[CurrentY] = Bilde
     
     Test = OperationsCounter.ApplyAlphaOperation
     HistoAlpha[CurrentY] = Test
 
     #MaskTest
-    BildeMask = AlphaMasking.MaskingOperations.MaskAllChannels(BufferedPicture1, BufferedPicture2, BufferedMask, CurrentY)
+    BildeMask = TestAlphaMaskin.MaskingOperations.MaskAllChannels(BufferedPicture1, BufferedPicture2, BufferedMask, CurrentY, TestObject)
     OutputBuffer[CurrentY] = Bilde
 
     HistoMask[CurrentY] = OperationsCounter.ApplyMask

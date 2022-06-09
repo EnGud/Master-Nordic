@@ -4,14 +4,15 @@ import AlphaBlending, AlphaMasking
 
 class SceneDescriptor:
     #Generate Scene
-    def __init__(Self, layers, elements, ResolutionX, ResolutionY):
+    def __init__(Self, layers, elements, ResolutionX, ResolutionY, AlphaTargets, MaskTargets):
         Self.Exists = 1
         Self.ScreenSizeX = ResolutionX
         Self.ScreenSizeY = ResolutionY
+        NumLayers= layers
+        NumElements = elements
 
         #Generate layers
         for i in range (layers-1):
-            Self.Layer[i]
             for place in range (elements-1):
 
                 Self.Layer[i].PictureInfo.AlphaElement = [0]
@@ -32,17 +33,24 @@ class SceneDescriptor:
 
 
         #Info om operasjoner
-        Self.SceneOperations.Mask = []
+        Self.SceneOperations.Mask.Mask = [[],[]]
         Self.SceneOperations.Mask.Apply = False
-        Self.SceneOperations.Layer = [0, 0]
+        Self.SceneOperations.Mask.NumberOfTargets = MaskTargets
+        #for i in range (Self.SceneOperations.Mask.NumberOfTargets):
+        Self.SceneOperations.Mask.Target = np.zeros((layers, elements), dtype=np.uint8)
         Self.SceneOperations.Mask.StartY = 0
-        Self.SceneOperations.mask.StartX = 0
+        Self.SceneOperations.Mask.StartX = 0
 
+        Self.SceneOperations.GlobalForegroundAlpha = 0
         Self.SceneOperations.Alpha.Apply = False
+        Self.SceneOperations.Alpha.NumberOfTargets = AlphaTargets
+        #for i in range (Self.SceneOperations.Alpha.NumberOfTargets):
         Self.SceneOperations.Alpha.Target = np.zeros((layers, elements), dtype=np.uint8)
         Self.SceneOperations.Alpha.StartX = 0
+        Self.SceneOperations.Alpha.StartY = 0
 
         Self.SceneOperations.GlobalCLUT = False
+        Self.Scene.Exit = False
         #GlobalCLUT False = bruk lokale CLUT. (Standard)
 
 

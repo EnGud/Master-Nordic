@@ -15,11 +15,14 @@ class OperationsCounter():
         ApplyAlphaOperation = 0
 
         ApplyMask = 0
+        ApplyNoMask = 0
 
         ModifyCLUT = 0
         ApplyCLUT = 0
 
         
+
+
 
 
     

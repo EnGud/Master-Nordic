@@ -6,7 +6,7 @@ from PIL import Image
 class MaskingOperations:
 
 
-    def MaskAllChannels(PictureFG, PictureBG, Mask, CurrentY):
+    def MaskAllChannels(PictureFG, PictureBG, Mask, CurrentY, OperationsCounter):
         FGSize = PictureFG.size
         X_Size = (FGSize[0]-1)
         Output = np.zeros((1, X_Size, 4))
@@ -27,7 +27,7 @@ class MaskingOperations:
                 Output[0][i][0] = ArrayedForeground[CurrentY][i][0]
                 Output[0][i][1] = ArrayedForeground[CurrentY][i][1]
                 Output[0][i][2] = ArrayedForeground[CurrentY][i][2]
-                OperationsCounter.ApplyMask =+1
+                OperationsCounter.ApplyNoMask =+1
                 return Output
 
             else:
