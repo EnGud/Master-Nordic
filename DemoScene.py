@@ -1,3 +1,6 @@
+from asyncio import start_unix_server
+from email.errors import StartBoundaryNotFoundDefect
+from struct import Struct
 import Scene_Descriptor
 import AlphaBlending
 import AlphaMasking
@@ -15,7 +18,7 @@ TestEntity = OperationsCounter.OperationsCounter
 
 #Build Scenes setup
 
-#Setup. Testing purposes.
+#Setup. Testing purposes. Ignore.
 print("Custom resolution? Yes/No")
 if(input()==("Yes" or "yes")):
     print("Please input X resolution")
@@ -33,9 +36,10 @@ else:
 def MainMenuBuild():
     #Sjekk om instans eksisterer ift. loops, for å slippe unødvendig rekonstruksjon.
     #if ((MainMenu.Exists) != 1):
+    #Flyttet til main loop
     
-        #Setup Scene. Input #layers, #PictureElements, #ScreenX, #ScreenY
-        MainMenu = Scene_Descriptor.SceneDescriptor(2, 3, ScreenResolutionX, ScreenResolutionY)
+        #Setup Scene. Input #layers, #elements, #ResolutionX, #ResolutionY, #AlphaTargets, #MaskTargets
+        MainMenu = Scene_Descriptor.SceneDescriptor(2, 3, ScreenResolutionX, ScreenResolutionY, False, False)
         MainMenu.Exists = 1
         #Insert pictures. Fugly.
         MainMenu.Layer[0].Picture.Picture[0].PictureSize = [800, 600]
@@ -65,9 +69,9 @@ def MainMenuBuild():
 def SettingsMenuBuild():
     if ((SettingsMenu.Exists) != 1):
         #Setup Scene. Input #layers, #PictureElements, #ScreenX, #ScreenY
-        SettingsMenu = Scene_Descriptor.SceneDescriptor(3, 2, ScreenResolutionX, ScreenResolutionY)
+        SettingsMenu = Scene_Descriptor.SceneDescriptor(3, 2, ScreenResolutionX, ScreenResolutionY, False, False)
         SettingsMenu.Exists = 1
-        #Insert pictures. Fugly.
+        #Insert pictures and data. Fugly.
         SettingsMenu.Layer[0].Picture.Picture[0].PictureSize = [800, 600]
         SettingsMenu.Layer[0].Picture.Picture[0].Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp")
 
@@ -89,7 +93,7 @@ def SettingsMenuBuild():
 #Construct Subsettings Menu
 def SubSettingsMenuBuild():
     if ((SubSettingsMenu.Exists) != 1):
-        SubSettingsMenu = Scene_Descriptor.SceneDescriptor(3, 2, ScreenResolutionX, ScreenResolutionY)
+        SubSettingsMenu = Scene_Descriptor.SceneDescriptor(3, 2, ScreenResolutionX, ScreenResolutionY, False, False)
         SubSettingsMenu.Exists = 1
 
         SubSettingsMenu.Layer[0].Picture.Picture[0].PictureSize = [800, 600]
@@ -101,7 +105,7 @@ def SubSettingsMenuBuild():
 def OrderCoffeeBuild():
     if ((OrderCoffee.Exists) != 1):
 
-        OrderCoffee = Scene_Descriptor.SceneDescriptor(2, 1, ScreenResolutionX, ScreenResolutionY)
+        OrderCoffee = Scene_Descriptor.SceneDescriptor(2, 1, ScreenResolutionX, ScreenResolutionY, False, False)
         OrderCoffee.Exists = 1
 
         OrderCoffee.Layer[0].Picture.Picture[0].PictureSize = [800, 600]
@@ -121,20 +125,43 @@ def OrderCoffeeBuild():
 #Ikke pri akkurat nå.
 
 
+#Flytt funksjoner som denne inn i egen fil, typ RenderOperators.py. Hold DemoScene clean.
 def Render(Structure):
+    for y in range (Structure.ScreenSizeY):
 
-    for i in range (Structure.NumLayers, 0, -1):
-        for j in range(Structure.NumElements, 0, -1):
+        #JALLALØSNING, HVA FAEN???
+        FreeLine = np.zeros((1, 800))
 
-            #Check if data/picture present. Else, skip.
-            if (Structure.Layer[i].Picture.Picture[j].Picture):
-                if (Structure.SceneOperations.Alpha.Apply):
+        for i in range (Structure.NumLayers, 0, -1):
+            for j in range(Structure.NumElements, 0, -1):
+            
+                #Check if data/picture present. Else, skip.
+                if (Structure.Layer[i].Picture.Picture[j].Picture):
+                    
+                    
+                    #Denne skal sjekke hvert bilde, ikke globalt. Fiks i helga.
+                    if (Structure.SceneOperations.Alpha.Apply):
+                        #ApplyAlpha som normalt. FG og BG Target = currentlayer & Background
+                        Structure.Layer[i].Picture.Picture[j].Picture = AlphaBlending.AlphaOperations.ApplyAlpha((Structure.Layer[i].Picture.Picture[j].Picture), (Structure.Layer[0].Picture[0].Picture), y, "Over", TestEntity)
+                        
+                    #Same
+                    if(Structure.SceneOperation.Mask.Apply):
+                       Structure.Layer[i].Picture.Picture[j].Picture = AlphaMasking.MaskingOperations.MaskAllChannels((Structure.Layer[i].Picture.Picture[j].Picture), (Structure.Layer[0].Picture[0].Picture), (Structure.SceneOperations.Mask.Mask), y, TestEntity)
+
+
+                    if (Structure.SceneOperations.GlobalCLUT or Structure.Layer[i].Picture.Picture[j].CLUT):
+                        return 0
+                        #Ordne raskt senere, burde gå fort
+
+
                     
 
-                if(Structure.SceneOperation.Mask.Apply):
-                    return 0
-
-                #Rendre lag
+                    #Fyll LineBuffer med nåværende lag, dersom ikke allerede fylt av høyere lag
+                    for k in range (Structure.Layer[i].Picture.Picture[j].Picture):
+                        if (not(FreeLine[k])):
+                            LineBuffer[k] = Structure.Layer[i].Picture.Picture[j].Picture[]
+                            FreeLine[k] = 1
+                    #Rendre lag
 
 
 
@@ -167,6 +194,7 @@ def RunAlpha(structure):
 
 
 def RunMask(structure):
+    #Samme som Alpha. Hent maske.
     return 0
 
 #InitValues
@@ -198,26 +226,16 @@ while(1):
             MainMenu = MainMenuBuild()
         
 
-
-
-        
-
-
-
-
         #If alpha = True
         #Check which alpha picture 
         #apply with target 
 
-        #Frigjør plass/ressurser. Spør om trengs
-        #if (StateMachineStatus != "Main"):
-        #   del MainMenu
-
         Runs += 1
 
         if (Runs >= 5):
-            #Kunne brukt enum
+            #Kunne brukt enum, menmen
             StateMachineStatus == "Settings"
+            #Frigjør plass/ressurser. Spør om trengs
             del MainMenu
             Runs = 0
 
@@ -236,9 +254,10 @@ while(1):
     elif (StateMachineStatus == "OrderCoffee"):
         if (not(OrderCoffee)):
             OrderCoffee = OrderCoffeeBuild()
+
+    else:
+        break
     
-
-
     #TestSetup for circular demo scene test
 
 
