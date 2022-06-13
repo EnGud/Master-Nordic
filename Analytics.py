@@ -1,6 +1,22 @@
-import numpy as np
+import matplotlib.pyplot as plt
 
-np.histogram(a,bins = [0,20,40,60,80,100]) 
-hist,bins = np.histogram(a,bins = [0,20,40,60,80,100]) 
-print hist 
-print bins 
+class Analytics:
+
+    #input structure contains multiple attributes. Create induvidual histograms for each attribute. 
+    def histogram(self, input_structure):
+        #create a histogram for each attribute
+        for i in range(len(input_structure)):
+            #create a histogram for each attribute
+            Histogram = [0]*256
+            for j in range(len(input_structure[i])):
+                Histogram[input_structure[i][j]] += 1
+            self.PlotHistogram(Histogram)
+        return Histogram
+  
+  
+
+
+
+    def PlotHistogram(Histogram):
+        plt.bar(range(256), Histogram)
+        plt.show()

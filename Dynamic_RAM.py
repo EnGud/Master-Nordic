@@ -1,56 +1,77 @@
+#This code will simulate a dynamic RAM module with a set size as init input argument.
+#It will increment an attribute of the input class "TestEntity" every time each function is called.
+import ctypes
+from numpy import true_divide
 
-class RAM(Size, TestEntity):
+
+class RAM:
     def __init__(self, Size):
         self.Size = Size
         self.data = [None] * Size
-        self.TestEntity = TestEntity
-        self.TestEntity.TestEntity_count = 0
-        self.TestEntity.RAM_put = 0
-        self.RAM_get = 0
-        self.TestEntity.TestEntity_count_check = 0
-        self.TestEntity.TestEntity_count_free = 0
-        self.TestEntity.TestEntity_count_error = 0
+        self.dataoccupied = [False] * Size
 
-    def put(self, data):
-        self.TestEntity.RAM_put += 1
-        if self.TestEntity.RAM_put == 1:
-            print("put function called once")
-        elif self.TestEntity.RAM_put > 1:
-            print("put function called", self.TestEntity.RAM_put, "times")
-        if self.TestEntity.TestEntity_count_error == 0:
-            for i in range(len(self.data)):
-                if self.data[i] == None:
-                    self.data[i] = data
-                    return i
-            print("No space left in the RAM")
-            self.TestEntity.TestEntity_count_error += 1
+
+# it will contain a function to put data into the ram, and return the adress of the data such that the same data can be collected later given the adress.
+    def put(self, data, TestEntity):
+        TestEntity.RAM_put += 1
+
+
+        #loop through dataoccupied to see if there is space left in the ram. If there is, put the data in the ram.
+        for i in range(len(self.dataoccupied)):
+            if self.dataoccupied[i] == False:
+                self.data[i] = data
+                self.dataoccupied[i] = True
+                TestEntity.RAM.put += 1
+                return i
+        #If no place left in the ram, print error.
+        print("No space left in the RAM")
+        return -1
+
+
+
+
+
+# it will contain a function to get data from ram by a given adress.
+    def get(self, adress, TestEntity):
+        TestEntity.RAM.get.get += 1
+
+        #check if the adress is in the ram
+        #If not in RAM
+        if self.data[adress] == None or self.dataoccupied[adress] == False:
+            print("Data not in the RAM")
+            TestEntity.RAM.get.DataNotFound += 1
             return -1
 
-    def get(self, adress):
-        self.RAM_get += 1
-        if self.RAM_get == 1:
-            print("get function called once")
-        elif self.RAM_get > 1:
-            print("get function called", self.RAM_get, "times")
-        if self.TestEntity.TestEntity_count_error == 0:
-            if self.data[adress] == None:
-                print("Data not in the RAM")
-                self.TestEntity.TestEntity_count_error += 1
-                return -1
-            else:
-                return self.data[adress]
+        #If in RAM
+        elif self.data[adress] != None and self.dataoccupied[adress] == True:
+            TestEntity.RAM.get.DataFound += 1
+            return self.data[adress]
 
-    def check(self):
-        self.TestEntity.TestEntity_count_check += 1
-        if self.TestEntity.TestEntity_count_check == 1:
-            print("check function called once")
-        elif self.TestEntity.TestEntity_count_check > 1:
-            print("check function called", self.TestEntity.TestEntity_count_check, "times")
-        if self.TestEntity.TestEntity_count_error == 0:
-            count = 0
-            for i in range(len(self.data)):
-                if self.data[i] != None:
-                    count += 1
-            return count
-        else:
+
+        #Situations not covered will give an error.
+        elif (self.dataoccupied[adress] == True and self.data[adress] == None) or (self.dataoccupied[adress] == False and self.data[adress] != None):
+            TestEntity.RAM.get_error += 1
+            print("Fatal Error. Situation not covered by the code.")
             return -1
+
+#It will contain a function to clear out the data and dataoccupied arrays to make them empty in a given adress
+    def clear(self, adress, TestEntity):
+        self.data[adress] = None
+        self.dataoccupied[adress] = False
+        TestEntity.RAM.clear += 1
+        return True
+
+
+#it will contain a function to check how much of the ram is used
+#and how much is free.
+    def check(self, TestEntity):
+        count = 0
+        for i in range(len(self.dataoccupied)):
+            if self.dataoccupied[i] == True:
+                count += 1
+        print("There are", count, "data in the RAM")
+        TestEntity.RAM.check += 1
+        return count
+    
+
+

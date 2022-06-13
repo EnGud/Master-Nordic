@@ -1,232 +1,144 @@
-from ast import Return
-from math import fabs
-from multiprocessing.dummy import Array
-from tkinter import Image
-from turtle import clear
-import PIL
-from PIL import Image
+#Alpha Compositing
+
 import numpy as np
-import OperationsCounter
-#import lvgl as lv
+
+#Alpha Compositing is the process of combining two images with a transparency mask
 
 
-#def UserImageOpen()
-#Number of pictures Input()
-#Loop through numbers, taking input picture location as new input()
-
-
-#R2, G2, B2, A2 = Image.split(BufferedPicture2)
-
-class AlphaOperations:
-
-
-    def AlphaFormula(Operator, Fg, A, Bg):
-        if(Operator == "Over"):
-            Out = Fg*A+(1-A)*Bg
-            return Out
-
-        #Andre operatører, TBA
-        elif(Operator == "Xor"):
-            exit
-        elif(Operator == "Top"):
-            exit
-        elif(Operator == "And"):
-            exit
-        elif(Operator == "Xor"):
-            exit
-        elif(Operator == "Xor"):
-            exit
-        else:
-            exit
-
-
-    #If different format or illeglible/missing alpha
-    def CheckAlpha(Picture):
-    #If Picture != RGBA
-        Height, Width, Channels = np.asarray(Picture).shape
-        if Channels != 4:
-            print("Image #X has no Alpha Channel. Please input desired transparency:")
-            while (Channels != 4 or (UserAlpha > 255 or UserAlpha < 0)):
-                NumberPlease = input()
-                if (NumberPlease.isdigit()):
-                    UserAlpha = int(input())
-                    if UserAlpha > 255 or UserAlpha < 0:
-                        print("Alpha must be between 0 and 255")
-                    elif UserAlpha <= 255 or UserAlpha >= 0:
+#Function that checks if a picture contains alpha.
+def check_alpha(picture, TestEntity):     
+        #If it does not, allow the user to input a custom alpha. If it is not within bounds (0, 255), return an error and ask again.
+        if (len(picture[0][0]) == 3):
+            while True:
+                alpha = input("Enter alpha value: ")
+                if alpha.isdigit():
+                    alpha = int(alpha)
+                    if alpha >= 0 and alpha <= 255:
                         break
+                    else:
+                        print("Invalid alpha value")
                 else:
-                    print("Please input a number")
-
-
+                    print("Invalid alpha value")
             
-            Picture.putalpha(UserAlpha)
-            #BufferedPicture2.save("test.bmp", "BMP")
-        OperationsCounter.CheckAlpha =+ 1
-
-
-    #Input foreground, background
-    def ApplyAlpha(PictureFG, PictureBG, CurrentY, operatorIn, OperationsCounter):
-        #Setups local variables etc.
-        FGSize = PictureFG.size 
-        BGSize = PictureBG.size 
-        FG_X_Size, FG_Y_Size, BG_X_Size, BG_Y_Size = (FGSize[0]-1), (FGSize[1]-1), (BGSize[0]-1), (BGSize[1]-1)
-
-  #      BitDepthRed, BitDepthGreen, BitDepthBlue
-
-
-        ArrayedForeground = np.asarray(PictureFG)
-        #LineForeground = ArrayedForeground[CurrentY]
-        ArrayedBackground = np.asarray(PictureBG)
-        #LineBackground = ArrayedBackground[CurrentY]
-
-        Output = np.zeros((1, BG_X_Size, 4), dtype=np.uint8)
- 
-
-        #Flagging-system
-        RIsReady = False
-        GIsReady = False
-        BIsReady = False
-
-        #count
-        OperationsCounter.ApplyAlphaInit =+ 1
-        #Iterate over each pixel, each channel, applying the alpha
-        #Bedre å hente ut arrayene til 1D array, istedenfor søk hver iterasjon? 
-
-        #ApplyAlpha for hver kanal, R G B.
-
-        #RED
-        for i in range (FG_X_Size):
-            LocalFgR = ArrayedForeground[CurrentY][i][0]
-            LocalA = ArrayedForeground[CurrentY][i][3]/255
-            LocalBgR = ArrayedBackground[CurrentY][i][0]
             
-            Output[0][i][0] = int(AlphaOperations.AlphaFormula(operatorIn, LocalFgR, LocalA, LocalBgR))
+            #put the alpha value into thepicture
+            PictureOut = [[[0, 0, 0, 0] for i in range(len(picture[0]))] for j in range(len(picture))]
 
-            OperationsCounter.ApplyAlphaR =+ 1
-            if (i is (FG_X_Size-1)):
-                RIsReady = True
+            for i in range(len(picture)):
+                for j in range(len(picture[i])):
+                    PictureOut[i][j][0] = picture[i][j][0]
+                    PictureOut[i][j][1] = picture[i][j][1]
+                    PictureOut[i][j][2] = picture[i][j][2]
+                    PictureOut[i][j][3] = alpha
+            print("Alpha value set.")
+            return PictureOut
+        else:
+            print("Alpha already present")
+            #ask user if want to input new alpha
+            print("Do you want to input a new alpha value? Y/N")
+            if (input() == "y" or "Y" or "yes" or "Yes"):
+                while True:
+                    alpha = input("Enter alpha value: ")
+                    if alpha.isdigit():
+                        alpha = int(alpha)
+                        if alpha >= 0 and alpha <= 255:
+                            break
+                        else:
+                            print("Invalid alpha value")
+                    else:
+                        print("Invalid alpha value")
 
+                for i in range (len(picture)):
+                    for j in range (len(picture[i])):
+                        picture[i][j][3] = alpha
+                return picture
+                
+            
+            
+            else:
+                print("ok, no alpha value set.")
+                
+            return picture
+
+
+
+#Formula for simple "Over" operator.
+def AlphaFormula(Fg, Bg, Alpha):
+        #Out = Fg*A+Bg*(1-A)
+        return Fg*Alpha + Bg*(1-Alpha)
+
+
+    #Create a function that blends two pictures together, using foregrounds alpha as "mask".
+def ApplyAlpha(Foreground, Operator, Background, currentY, TestEntity):
+        #0 = transparent, 255 = opaque
+        #Create PictureOut as an output buffer
+        PictureOut = np.zeros((len(Foreground[currentY]), 4), dtype=np.uint8)
+
+
+        #For each pixel in the picture, apply the alpha value
+        if (Operator == ("Over" or "over")):
+            for CurrentX in range (len(Foreground[0])):
+                
+                if Foreground[currentY][CurrentX][3] == 0:
+                    PictureOut[CurrentX] = Foreground[currentY][CurrentX]
+                    #TestEntity.AlphaPassed += 1
+                else:
+                        
+                    #map the foreground alpha value to a range of 0 to 1. This is done to avoid floating point errors.
+                    #wtf skjer her? bugga bajs
+                    Alpha = np.asarray(Foreground[currentY][CurrentX][3])
+                    AlphaOut = Alpha
+                    Alpha = Alpha/255
+                   
+                    
+                    #TestEntity.ApplyAlpha += 1
+
+
+
+                    
+                    Red = AlphaFormula(Foreground[currentY][CurrentX][0], Background[currentY][CurrentX][0], Alpha)
+                    Green = AlphaFormula(Foreground[currentY][CurrentX][1], Background[currentY][CurrentX][1], Alpha)
+                    Blue = AlphaFormula(Foreground[currentY][CurrentX][2], Background[currentY][CurrentX][2], Alpha)
+                    #Combine Red, Green and Blue into PictureOut
+                    PictureOut[CurrentX] = [Red, Green, Blue, AlphaOut]
+
+            return PictureOut
+
+        #Ubrukte funksjoner nedenfor.
+        if (Operator == "in"):
+            #not used
+            pass
+        if (Operator == "out"):
+            #not used
+            pass
+        if (Operator == "atop"):
+            #not used
+            pass
+        if (Operator == "xor"):
+            #not used
+            pass
+
+
+    #Ikke testa. ikke viktig atm. drit i hele funksjonen. :)
+def ApplyGammaCorrection(self, Foreground, Background, currentY, Gamma, TestEntity):
+                #StackOverflow'd-ish & Veldig Wikipedia'd.
         
-        #GREEN
-        for i in range (FG_X_Size):
-            LocalFgG = ArrayedForeground[CurrentY][i][1]
-            LocalA = float(ArrayedForeground[CurrentY][i][3])/255
-            LocalBgG = ArrayedBackground[CurrentY][i][1]
-            
-            Output[0][i][1] = AlphaOperations.AlphaFormula(operatorIn, LocalFgG, LocalA, LocalBgG)
+        #Buffer
+        PictureOut = np.zeros((len(Foreground[currentY]), 4), dtype=np.uint8)
+        #For each pixel in the picture, apply the alpha value and gamma correction
+        for i in range(len(Foreground)):
+            for j in range(len(Foreground[i])):
+                #Apply the alpha value
+                #feil
+                Alpha = Foreground[currentY][i][3]
+                PictureOut[i][j][3] = Foreground[i][j][3]*Alpha
+                #Apply the gamma correction
+                PictureOut[i][j][0] = Foreground[i][j][0]**Gamma
+                PictureOut[i][j][1] = Foreground[i][j][1]**Gamma
+                PictureOut[i][j][2] = Foreground[i][j][2]**Gamma
+        return PictureOut
+    #Mattematisk formel for gamma-korreksjon:
+    #Co = ((Ca**(1/gamma)*Aa + Cb**(1/gamma)*Ab*(1-Aa))/Ao)**(gamma)
 
 
-            OperationsCounter.ApplyAlphaG =+ 1
-            if (i is (FG_X_Size-1)):
-                GIsReady = True
-
-        #BLUE
-        for i in range (FG_X_Size):
-            LocalFgB = ArrayedForeground[CurrentY][i][2]
-            LocalA = float(ArrayedForeground[CurrentY][i][3])/255
-            LocalBgB = ArrayedBackground[CurrentY][i][2]
-            
-            Output[0][i][2] = AlphaOperations.AlphaFormula(operatorIn, LocalFgB, LocalA, LocalBgB)
-
-            OperationsCounter.ApplyAlphaB =+ 1
-            if (i is (FG_X_Size-1)):
-                BIsReady = True
-
-
-        return Output
-
-
-        #Dersom 1D array, bytt til
-        #for i in range (Offset, (xlength+Offset)):
-        #        BlueArray[i] = int((ArrayedForeground[y][i][2] * ArrayedForeground[y][i][3]/255) + (ArrayedBackground[y][i][2] * (1.0 - float(ArrayedForeground[y][i][3])/255)));
-        
-    
-
-        #if (RIsReady and GIsReady and BIsReady):
-
-            #for i in range (xlength):
-            #    OutResult[i][0] = RedArray[i]
-           # for i in range (xlength):
-           #     OutResult[i][1] = GreenArray[i]
-           # for i in range (xlength):    
-           #     OutResult[i][2] = BlueArray[i]
-
-            #Update flags
-           # RIsReady = False
-           # GIsReady = False
-           # BIsReady = False
-            
-
-
-
-        OperationsCounter.ApplyAlpha =+ 1
-
-        return OutResult
-
-
-
-    
-
-
-#Leftover Code Backup
-
-
-#           RedArray[i] = int((ArrayedForeground[ylength][i][3]* ArrayedForeground[ylength][i][3]/255) + (ArrayedBackground[ylength][i][0] * (1.0 - float(ArrayedForeground[ylength][i][3])/255)));
-#           GreenArray[i] = int((ArrayedForeground[ylength][i][1] * ArrayedForeground[ylength][i][3]/255) + (ArrayedBackground[ylength][i][1] * (1.0 - float(ArrayedForeground[ylength][i][3])/255)));
-#           BlueArray[i] = int((ArrayedForeground[ylength][i][2] * ArrayedForeground[ylength][i][3]/255) + (ArrayedBackground[ylength][i][2] * (1.0 - float(ArrayedForeground[ylength][i][3])/255)));
-           
-
-
-#        def __iter__(self, Picture1, Picture2, ycoordinate):
- #       #Picture1 foreground, Picture2 background
-  #          self.ArrayedForeground = np.asarray(Picture1)
-   #         self.ArrayedBackground = np.asarray(Picture2)
 #
- #           
-  #          #Convert to between 0.0 and 1.0 as array
-   #         #R, G, B = R/255, G/255, B/255
-#
- #           OperationsCounter.ApplyAlphaInit =+ 1
-  #          return self
-   # 
-    #    def __next__(self):
-     #       
-      #      
-       #     for i in range (Offset, (Offset + xlength)):
-        #        #Iterer over hver R, G, B, over hver pixel. Begrensning til en linje kommer når funksjonen funker ;)))))))
-#
-#
- #               outputRed = (Picture1[3][1][i]/255 * Picture1[3][4][i]/255) + (Picture2[3][1][i]/255 * (1.0 - float(Picture1[3][4][i])/255));
-  #              outputGreen = (Picture1[3][2][i]/255 * Picture1[3][4][i]/255) + (Picture2[3][2][i]/255 * (1.0 - float(Picture1[3][4][i]))/255);
-   #             outputBlue = (Picture1[3][3][i]/255 * Picture1[3][4][i]/255) + (Picture2[3][3][i]/255 * (1.0 - float(Picture1[3][4][i]))/255);
-
-
-
-            #if size > max
-            #   raise StopIteration
-           # OperationsCounter.ApplyAlpha =+ 1
-
-
-
-
-    #Main Loop
-    #CheckAlpha(BufferedPicture2)
-    #ApplyAlpha()
-   # Test = np.asarray(BufferedPicture2)
-   # print(Test.shape)
-
-
-
-
-
-
-
-
-
-    #Testsinsgss
-    #print(np.asarray(BufferedPicture2))
-
-#    BufferedPicture1 = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/800x600_Wallpaper_Blue_Sky.jpg")
-#    BufferedPicture1.putalpha(250)
-#    print(BufferedPicture1.mode)
-#    BufferedPicture1.save("Test.bmp")
