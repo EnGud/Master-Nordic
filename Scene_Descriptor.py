@@ -64,3 +64,6 @@ class SceneDescriptor:
         Self.SceneOperations.GlobalCLUT = False
         Self.Scene.Exit = False
         #GlobalCLUT False = bruk lokale CLUT. (Standard)
+
+
+        

@@ -180,3 +180,5 @@ print(TestEntity)
 #Lag Histogram. Hent fra Analytics.py?
 Result = Analytics.Histogram(TestEntity)
 Analytics.PlotHistogram(Result)
+
+
