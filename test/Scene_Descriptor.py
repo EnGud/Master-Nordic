@@ -31,8 +31,11 @@ class SceneDescriptor:
     class PictureInfo:
         def __init__(Self):
             Self.ApplyAlpha = False
-            Self.ApplyAlpha = False
-            Self.AlphaMask = [[]]
+            Self.ApplyTargetAlpha = False
+            Self.ApplyAlphaTarget = 0
+
+            Self.ApplyTargetMask = False
+            Self.ApplyMaskTarget = 0
             Self.ApplyMask = False
             Self.Mask = [[]]
 

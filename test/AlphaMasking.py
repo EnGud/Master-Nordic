@@ -20,12 +20,14 @@ def ApplyMask(PictureFG, PictureBG, Mask, CurrentY, FreeLine, OperationsCounter)
                 if Masking[CurrentY][i][0] == 0:
                     #Set the channel to the background picture
                     PictureOut[i][j] = PictureBG[CurrentY][i][j]
-                    #OperationsCounter.ApplyMask += 1
+                    OperationsCounter.ApplyNoMask += 1
                 else:
                     #Set the channel to the foreground picture
                     PictureOut[i][j] = PictureFG[CurrentY][i][j]
-                    #OperationsCounter.ApplyNoMask += 1
-    return PictureOut, FreeLine
+                    OperationsCounter.ApplyMask += 1
+
+    return PictureOut
+    #, FreeLine
     
 
         

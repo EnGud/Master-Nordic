@@ -31,7 +31,7 @@ OutputBuffer = np.zeros((ScreenResolutionX, 4), dtype=np.uint8)
 OutputBufferLarge = np.zeros((ScreenResolutionY, ScreenResolutionX, 4), dtype=np.uint8)
 
 
-
+RAM=Dynamic_RAM.RAM
 
 
 #Build the scenes. Manual.
@@ -61,17 +61,21 @@ def MainMenuBuild():
     MainMenu1.PictureInfo.PictureOffset = [(800-200), 0]
     
     MainMenu2 = Scene_Descriptor.SceneDescriptor(2, ScreenResolutionX, ScreenResolutionY, False, False)
-    MainMenu2.PictureInfo.PictureSize = [100, 100]
     MainMenu2.Picture = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp"))
+    MainMenu2.PictureInfo.PictureSize = [100, 100]
     MainMenu2.PictureInfo.PictureOffset = [(800-100), 300]
+    
     
     MainMenu3 = Scene_Descriptor.SceneDescriptor(3, ScreenResolutionX, ScreenResolutionY, False, False)
     MainMenu3.PictureInfo.PictureSize = [300, 100]
     MainMenu3.Picture = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp"))
     MainMenu3.PictureInfo.PictureOffset = [0, 200]
+
     MainMenu3.PictureInfo.LocalCLUT = False
     MainMenu3.PictureInfo.ApplyAlpha = False
     MainMenu3.PictureInfo.ApplyMask = False
+    MainMenu3.PictureInfo.ApplyTargetAlpha = False
+    MainMenu3.PictureInfo.ApplyTargetMask = False
 
     MainMenu = Scene_Descriptor.SceneItems
     MainMenu.Array = [MainMenuBG, MainMenu1, MainMenu2, MainMenu3]
@@ -160,18 +164,7 @@ def Render(Items, CurrentY, FreeLine):
     #.Items
     DrawnCurrentLine = False
     PictureOut = np.zeros((800, 4), dtype=np.uint8)
-    #This function will draw one Y-axis of the scene
-    #start with the highest i and lowest j in MainMenu.Layer[i].Picture.Picture[j].Picture. j will increment until the end of the layer, then i will increment and j will reset to 0
-    #then draw the next layer and repeat
-    #The picture is stored in MainMenu.Layer[i].Picture.Picture[j].Picture. It has the format of [ResolutionY, ResolutionX, [R, G, B, A]]
-    #create an array that checks if the current X position is occupied.
-    #iterate over the X-axis bitwise.
-    #If the current X position is occupied, it will not draw the current picture.
-    #If the current X position is not occupied, it will draw the current picture.
-    #then move to the next X-position.
-    #repeat until it reaches the end of the X-axis.
-    #then return the array of drawn X-positions.
-    #attempt to use threading where possible.
+
 
 
     # MainMenu.Array = [MainMenuBG, MainMenu1, MainMenu2, MainMenu3]#
@@ -179,15 +172,16 @@ def Render(Items, CurrentY, FreeLine):
     for i in range (len(Items.Array)-1, 0, -1):
         #Current Object
         Structure = Items.Array[i]
-            
+
 
         #Sjekk om bildet ligger innenfor CurrentY, og skal rendres. Hvis ikke, skipp linjen. Hopper til neste item på samme X-linje.
-        if((CurrentY >= Structure.PictureInfo.PictureOffset[1]) and (CurrentY <= Structure.PictureInfo.PictureSize[1] + Structure.PictureInfo.PictureOffset[1])):
-            
+
+        #check if CurrentY is larger or equal than the picture offset, but smaller than the picture size plus the offset (Check if CurrentY is within the picture)
         
-            #Jepp
-            
-            
+        if ((CurrentY >= Structure.PictureInfo.PictureOffset[1]) and (CurrentY <= Structure.PictureInfo.PictureOffset[1] + Structure.PictureInfo.PictureSize[1])): 
+        #if Jepp
+            Picture = np.zeros((Structure.PictureInfo.PictureSize[0], 4), dtype=np.uint8)
+            PictureModified = False
 
 
 
@@ -195,60 +189,54 @@ def Render(Items, CurrentY, FreeLine):
             if(Structure.PictureInfo.LocalCLUT):
                         #Generate CLUTPicture as empty image with size of picture
                         #ApplyCLUT(Picture, CLUT, CurrentY, OperationsCounter):
-                Picture = np.zeros((Structure.PictureInfo.PictureSize[0], 4), dtype=np.uint8)
-
-                        #Hvis flere operasjoner
-                        ##if (Structure.Layer[i].PictureInfo.ApplyAlpha) or (Structure.Layer[i].PictureInfo.ApplyMask):
-                            ##NextPicture = np.zeros((Structure.Layer[i].Picture.Picture[j].Picture.size[1], 4), dtype=np.uint8)
-                            ##NextPicture[CurrentY] = CLUT.ApplyCLUT(Structure.Layer[i].Picture.Picture[j].Picture, Structure.Layer[i].Picture.Picture[j].CLUT, CurrentY, TestEntity)
-
-                Picture[CurrentY] = CLUT.ApplyCLUT(Structure.Picture, Structure.PictureInfo.CLUT, CurrentY, FreeLine, TestEntity)
+                Structure.Picture[CurrentY] = CLUT.ApplyCLUT(Structure.Picture, Structure.PictureInfo.CLUT, CurrentY, FreeLine, TestEntity)
+                PictureModified = True
                 
 
 
-
-                    #Check if Alpha should be applied between picture and picture below
             if(Structure.PictureInfo.ApplyAlpha):
-
                         #Generate AlphaedPicture as empty image with size of picture
-                        #ApplyAlpha(Foreground, Operator, Background, currentY, TestEntity):
-                        
-                Picture[CurrentY] = AlphaBlending.AlphaAlpha(Structure.Picture, 'over', Items.Array[i-1].Picture, CurrentY, FreeLine, TestEntity)
-                    
-            if(Structure.PictureInfo.ApplyMask):
+                        #ApplyAlpha(Foreground, Operator, Background, currentY, TestEntity): 
+                        #Standard blender med bakgrunn. Om overlappende med annen, bruk ApplyTargetAlpha
+                Structure.Picture[CurrentY] = AlphaBlending.AlphaAlpha(Structure.Picture, 'over', Items.Array[0].Picture, CurrentY, FreeLine, TestEntity)
+                PictureModified = True
 
+            if(Structure.PictureInfo.ApplyTargetAlpha):
+                    #Generate AlphaedPicture as empty image with size of picture
+                    #ApplyAlpha(Foreground, Operator, Background, currentY, TestEntity): 
+                    #Bruk bare om to bilder overlapper.
+                Structure.Picture[CurrentY] = AlphaBlending.AlphaAlpha(Structure.Picture, 'over', Items.Array[Structure.PictureInfo.ApplyAlphaTarget].Picture, CurrentY, FreeLine, TestEntity)
+                PictureModified = True
+
+
+            if(Structure.PictureInfo.ApplyMask):
                         #Generate MaskedPicture as empty image with size of picture
                         #ApplyMask(PictureFG, PictureBG, Mask, CurrentY, OperationsCounter):
+                Structure.Picture[CurrentY] = AlphaMasking.ApplyMask(Structure.Picture, Items.Array[0].Picture, Structure.PictureInfo.Mask , CurrentY, TestEntity)
+                PictureModified = True
 
-                Picture[CurrentY] = AlphaMasking.ApplyMask(Structure.Picture, Items.Array[i-1].Picture, Structure.PictureInfo.Mask , CurrentY, TestEntity)
-                        #Ignorer target nå. prioriter resultat. Fiks etterpå.
-                        #samme med offset for alle funksjoner.
+            if(Structure.PictureInfo.ApplyTargetMask):
+                Structure.Picture[CurrentY] = AlphaMasking.ApplyMask(Structure.Picture, Items.Array[Structure.PictureInfo.ApplyMaskTarget].Picture, Structure.PictureInfo.Mask , CurrentY, TestEntity)
+                PictureModified = True
+
                 
-            
-
             #Use Freeline to "and" the current picture with FreeLine
-            for x in range(Structure.PictureInfo.PictureOffset[0], len(PictureOut[CurrentY])):
-                FreeLine = FreeLine & PictureOut[CurrentY]
+
+            #Merk av gjeldende piksler som er brukt.
+            for x in range (Structure.PictureInfo.PictureSize[0]):
+                FreeLine[x] = FreeLine[x] and Structure.Picture[CurrentY][x]
+                PictureOut[x + Structure.PictureInfo.PictureOffset[0]] = Structure.Picture[CurrentY][x]
+        
+    
+
+           
+
             
-            DrawnCurrentLine == True
-
-        else:
-            DrawnCurrentLine == False
-
-            if((CurrentY <= Structure.PictureInfo.PictureOffset[1]) and (CurrentY >= Structure.PictureInfo.PictureSize[1] + Structure.PictureInfo.PictureOffset[1])):
-
-                for x in range (Structure.PictureInfo.PictureSize[0]):
-                    PictureOut[x + Structure.PictureInfo.PictureOffset[0]] = Structure.Picture[CurrentY][x]
-
+            
 
 
     return PictureOut, FreeLine
-
-            
-        
-
-
-    #Unødvendig ekstra buffer, men rakk ikke finne bedre løsning. Men bedre løsning finnes nok. :)
+    
 
 
 
@@ -294,7 +282,9 @@ while(1):
 
         
         #draw OutputBufferLarge to screen
-        OutputBufferLarge.show()
+
+        OutputBufferPicture = Image.fromarray(OutputBufferLarge)
+        OutputBufferPicture.show()
         NewPictureReady = False
         ResetFreeLine()
 

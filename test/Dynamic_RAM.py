@@ -5,10 +5,11 @@ from numpy import true_divide
 
 
 class RAM:
-    def __init__(self, Size):
+    def __init__(self, Size, TestEntity):
         self.Size = Size
         self.data = [None] * Size
         self.dataoccupied = [False] * Size
+        self.TestEntity = TestEntity
 
 
 # it will contain a function to put data into the ram, and return the adress of the data such that the same data can be collected later given the adress.

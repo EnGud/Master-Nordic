@@ -1,0 +1,223 @@
+
+#from typing import Sized
+import numpy as np
+import AlphaBlending, AlphaMasking
+
+class SceneDescriptor:
+    #Generate Scene
+    def __init__(Self, layers, elements, ResolutionX, ResolutionY, AlphaTargets, MaskTargets):
+        Self.Exists = 1
+        Self.ScreenSizeX = ResolutionX
+        Self.ScreenSizeY = ResolutionY
+        Self.NumberOfLayers = layers
+        Self.NumberOfElements = elements
+
+        
+        Self.Layer = []*layers
+        
+        #Generate layers
+        for i in range (layers-1):
+            Self.Layer[i].Picture
+            for place in range (elements-1):
+                
+                #Generate an empty Alpha mask.
+                
+                Self.Layer[i].PictureInfo.ApplyAlpha = False
+                Self.Layer[i].PictureInfo.AlphaMask = np.zeros((Self.Layer[i].PictureInfo.Picture[elements].PictureSizeY, Self.Layer[i].PictureInfo.Picture[elements].PictureSizeX, 4), dtype=np.uint8)
+                
+
+                #Generate an empty mask.
+                Self.Layer[i].PictureInfo.ApplyMask = False
+                Self.Layer[i].PictureInfo.Mask = np.zeros((Self.Layer[i].PictureInfo.Picture[elements].PictureSizeY, Self.Layer[i].PictureInfo.Picture[elements].PictureSizeX, 4), dtype=np.uint8)
+
+                Self.Layer[i].PictureInfo.Picture[place].PictureSize = [0 , 0]
+                Self.Layer[i].Picture.Picture[place].PictureOffset = [0, 0]    
+                Self.Layer[i].Picture.Picture[place].Picture = np.zeros((Self.Layer[i].PictureInfo.Picture[elements].PictureSizeY, Self.Layer[i].PictureInfo.Picture[elements].PictureSizeX, 4), dtype=np.uint8)
+
+                Self.Layer[i].Picture.Picture[place].LocalCLUT=False
+                Self.Layer[i].Picture.Picture[place].CLUT = np.zeros((3, 256), dtype=np.uint8)
+
+
+        #3 Paralelle arrays for hver RGB-kanal for CLUT. Global.
+        Self.GlobalCLUT = np.zeros((3, 256), dtype=np.uint8)
+
+
+
+        #Info om operasjoner
+        
+        #Generate an empty mask.
+        Self.SceneOperations.Mask.Apply = False
+        Self.SceneOperations.Mask.Mask = np.zeros((Self.ScreenSizeX, Self.ScreenSizeY, 1), dtype=np.uint8)
+        
+        Self.SceneOperations.Mask.MaskTargets = MaskTargets
+
+
+        #for i in range (Self.SceneOperations.Mask.NumberOfTargets):
+        Self.SceneOperations.Mask.Target = np.zeros((layers, elements), dtype=np.uint8)
+        Self.SceneOperations.Mask.StartY = 0
+        Self.SceneOperations.Mask.StartX = 0
+
+        Self.SceneOperations.GlobalForegroundAlpha = 0
+        Self.SceneOperations.Alpha.Apply = False
+        Self.SceneOperations.Alpha.NumberOfTargets = AlphaTargets
+        #for i in range (Self.SceneOperations.Alpha.NumberOfTargets):
+        Self.SceneOperations.Alpha.Target = np.zeros((layers, elements), dtype=np.uint8)
+        Self.SceneOperations.Alpha.StartX = 0
+        Self.SceneOperations.Alpha.StartY = 0
+
+        Self.SceneOperations.GlobalCLUT = False
+        Self.Scene.Exit = False
+        #GlobalCLUT False = bruk lokale CLUT. (Standard)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#SCENE DESCRIPTOR
+
+
+
+
+        #from typing import Sized
+import numpy as np
+
+class SceneDescriptor:
+    #Generate Scene
+    def __init__(Self, layer, ResolutionX, ResolutionY, AlphaTargets, MaskTargets):
+        Self.Exists = 1
+        Self.SizeX = ResolutionX
+        Self.SizeY = ResolutionY
+        Self.Layer = layer
+        
+        class PictureInfo:
+            Self.ApplyAlpha = False
+            Self.ApplyAlpha = False
+            Self.AlphaMask = [[]]
+                
+
+       
+            Self.ApplyMask = False
+            Self.Mask = [[]]
+
+            Self.LocalCLUT=False
+            Self.CLUT = np.zeros((3, 256), dtype=np.uint8)
+
+            Self.PictureSize = [0, 0]
+            Self.PictureOffset = [0, 0]    
+
+
+        Self.Picture = [[]]
+
+
+        #3 Paralelle arrays for hver RGB-kanal for CLUT. Global.
+        Self.GlobalCLUT = np.zeros((3, 256), dtype=np.uint8)
+
+
+
+        #Info om operasjoner
+        
+        #Generate an empty mask.
+        Self.SceneOperations.Mask.Apply = False
+        Self.SceneOperations.Mask.Mask = np.zeros((Self.ScreenSizeX, Self.ScreenSizeY, 1), dtype=np.uint8)
+        
+        Self.SceneOperations.Mask.MaskTargets = MaskTargets
+
+
+        #for i in range (Self.SceneOperations.Mask.NumberOfTargets):
+        #Self.SceneOperations.Mask.Target = np.zeros((layers, elements), dtype=np.uint8)
+        Self.SceneOperations.Mask.StartY = 0
+        Self.SceneOperations.Mask.StartX = 0
+
+        Self.SceneOperations.GlobalForegroundAlpha = 0
+        Self.SceneOperations.Alpha.Apply = False
+        Self.SceneOperations.Alpha.NumberOfTargets = AlphaTargets
+        #for i in range (Self.SceneOperations.Alpha.NumberOfTargets):
+        #Self.SceneOperations.Alpha.Target = np.zeros((layers, elements), dtype=np.uint8)
+        Self.SceneOperations.Alpha.StartX = 0
+        Self.SceneOperations.Alpha.StartY = 0
+
+        Self.SceneOperations.GlobalCLUT = False
+        Self.Scene.Exit = False
+        #GlobalCLUT False = bruk lokale CLUT. (Standard)
+
+
+
+
+
+
+
+
+
+        #DEMOSCENE
+
+
+
+
+
+
+
+
+
+        def MainMenuBuild():
+    #Todo: Error if picture is larger than screen for every layer/picture.
+
+    MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY, False, False)
+    MainMenuBG.Exists = 1    
+
+    #set background to screen resolution
+    #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
+    MainMenuBG.Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp")
+    MainMenuBG.PictureInfo.PictureSize = [len(MainMenuBG.Picture), len(MainMenuBG.Picture[0])]
+    if (len(MainMenuBG.PictureInfo.PictureSize[0]) >= ScreenResolutionX) and len(len(MainMenuBG.PictureInfo.PictureSize[1]) >= ScreenResolutionY):
+        pass
+    else:
+        print("Error! Picture is not the same size as the screen resolution. The background needs to fit the screen.")
+        exit()
+    
+    MainMenu1 = Scene_Descriptor.SceneDescriptor(1, ScreenResolutionX, ScreenResolutionY, False, False)
+    MainMenu1.Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
+    MainMenu1.PictureInfo.PictureSize = [200, 100]
+    MainMenu1.PictureInfo.PictureOffset = [(800-200), 0]
+    
+    MainMenu2 = Scene_Descriptor.SceneDescriptor(2, ScreenResolutionX, ScreenResolutionY, False, False)
+    MainMenu2.PictureInfo.PictureSize = [100, 100]
+    MainMenu2.Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp")
+    MainMenu2.PictureInfo.PictureOffset = [(800-100), 300]
+    
+    MainMenu3 = Scene_Descriptor.SceneDescriptor(3, ScreenResolutionX, ScreenResolutionY, False, False)
+    MainMenu3.PictureInfo.PictureSize = [400, 200]
+    MainMenu3.Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_400_200.bmp")
+    MainMenu3.PictureInfo.PictureOffset = [0, 200]
+
+
+
+    #This function will draw one Y-axis of the scene
+    #start with the highest i and lowest j in MainMenu.Layer[i].Picture.Picture[j].Picture. j will increment until the end of the layer, then i will increment and j will reset to 0
+    #then draw the next layer and repeat
+    #The picture is stored in MainMenu.Layer[i].Picture.Picture[j].Picture. It has the format of [ResolutionY, ResolutionX, [R, G, B, A]]
+    #create an array that checks if the current X position is occupied.
+    #iterate over the X-axis bitwise.
+    #If the current X position is occupied, it will not draw the current picture.
+    #If the current X position is not occupied, it will draw the current picture.
+    #then move to the next X-position.
+    #repeat until it reaches the end of the X-axis.
+    #then return the array of drawn X-positions.
+    #attempt to use threading where possible.
