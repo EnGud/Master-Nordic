@@ -2,9 +2,15 @@
 import numpy as np
 
 def GenerateCLUT(sizeR, sizeG, sizeB):
-        #Generate a color lookup table for R, G and B channels with each channel having a size of sizeR, sizeG and sizeB. Start at 0 and end at sizeR-1, sizeG-1 and sizeB-1.
-        CLUT = [[[0 for b in range (sizeB)] for g in range (sizeG)] for r in range (sizeR)]
-        return CLUT
+        #Generate a color lookup table for R, G and B channels with each channel having a size of sizeR, sizeG and sizeB. Start at 0 and end at sizeR-1, sizeG-1 and sizeB-1. The array is 2D.
+    CLUTR = np.zeros((1, sizeR), dtype=np.uint8)
+    CLUTG = np.zeros((1, sizeG), dtype=np.uint8)
+    CLUTB = np.zeros((1, sizeB), dtype=np.uint8)
+    #Merge CLUTR, CLUTG and CLUTB into a single 2D array called CLUT
+    CLUT = np.concatenate((CLUTR, CLUTG, CLUTB), axis=0)
+    return CLUT
+
+
 
 def GenerateTestCLUT(sizeR, sizeG, sizeB):
     #Generate a color lookup table for R, G and B channels with each channel having a size of sizeR, sizeG and sizeB. Start at sizeR-1, sizeG-1 and sizeB-1 and end at 0.
@@ -24,40 +30,43 @@ def ChangeCLUT(OldCLUT, NewCLUT):
         OutCLUT = [[[0 for b in range (len(NewCLUT[0][0]))] for g in range (len(NewCLUT[0]))] for r in range (len(NewCLUT))]
 
         for i in range (len(OldCLUT)):
-            for j in range (len(OldCLUT[i])):
-                OutCLUT[i][j] = NewCLUT[i][j]
+            for CurrentX in range (len(OldCLUT[i])):
+                OutCLUT[i][CurrentX] = NewCLUT[i][CurrentX]
         return OutCLUT
 
-
-def ApplyCLUT(Picture, CLUT, CurrentY, TestEntity):
+#CurrentY er midlertidig til RAM er oppe
+def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, TestEntity):
     #Iterate through each pixel in Picture, use the value to find the position in the CLUT and set the pixel to the value in the CLUT.
     #Picture is a 2D array that contains the pixel values in R, G, B order.
     #CLUT is a 2D array that contains the CLUT values in R, G, B order.
     #CurrentY is the current Y position in Picture.
     #PictureOut is a 2D array that contains the pixel values in R, G, B order.
-    PictureOut = np.zeros((len(Picture[0]), 4), dtype=np.uint8)
+    PictureOut = np.zeros((800, 4), dtype=np.uint8)
 
     #Get the RGB values from Picture
     #Create temp as [4][255] using numpy
     Temp = np.zeros((4), dtype=np.uint8)
 
 
-    for i in range(len(Picture[CurrentY])):
-        Temp[0], Temp[1], Temp[2] = Picture[CurrentY][i][0], Picture[CurrentY][i][1], Picture[CurrentY][i][2]
+    for CurrentX in range(len(Picture)):
+        if FreeLine[CurrentX+X_Offset]:
+            Temp[0], Temp[1], Temp[2] = Picture[CurrentX][0], Picture[CurrentX][1], Picture[CurrentX][2]
 
-        #[0, 0, 0, 0]
-        #Use the RGB values to find the position in the CLUT. R, G, B
+                #[0, 0, 0, 0]
+                #Use the RGB values to find the position in the CLUT. R, G, B
 
-        Temp[0], Temp[1], Temp[2] = CLUT[0][Temp[0]], CLUT[1][Temp[1]], CLUT[2][Temp[2]]
+            Temp[0], Temp[1], Temp[2] = CLUT[0][Temp[0]], CLUT[1][Temp[1]], CLUT[2][Temp[2]]
 
 
 
-        #Set the pixel to the value in the CLUT
-        
-        PictureOut[i][0], PictureOut[i][1], PictureOut[i][2] = Temp[0], Temp[1], Temp[2]
-        if (len(Picture[CurrentY][i]) == 4):
-            PictureOut[i][3] = Picture[CurrentY][i][3]
+                #Set the pixel to the value in the CLUT
+                
+            PictureOut[CurrentX+X_Offset][0], PictureOut[CurrentX+X_Offset][1], PictureOut[CurrentX+X_Offset][2] = Temp[0], Temp[1], Temp[2]
+            if (len(Picture[CurrentX]) == 4):
+                PictureOut[CurrentX+X_Offset][3] = Picture[CurrentX+X_Offset][3]
+            
+            FreeLine[CurrentX + X_Offset] = False
 
-    return PictureOut
+    return PictureOut, FreeLine
 
     

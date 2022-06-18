@@ -3,7 +3,7 @@
 import numpy as np
 
 #Alpha Compositing is the process of combining two images with a transparency mask
-
+PictureOut = np.zeros((800, 4), dtype=np.uint8)
 
 #Function that checks if a picture contains alpha.
 def check_alpha(picture, TestEntity):     
@@ -62,83 +62,68 @@ def check_alpha(picture, TestEntity):
 
 
 
+
 #Formula for simple "Over" operator.
 def AlphaFormula(Fg, Bg, Alpha):
         #Out = Fg*A+Bg*(1-A)
         return Fg*Alpha + Bg*(1-Alpha)
 
+#Create a function that blends two pictures together, using foregrounds alpha as "mask".
+def ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity):
+    #The input Foreground is a picture of x length with a x offset relative to background. Background is a picture of another length.
+    #The output is a picture of the same length as the background, but with the foreground applied.
+    if (Operator == ("Over" or "over")):
+        
+        for CurrentX in range(len(Foreground)):
+            
 
-    #Create a function that blends two pictures together, using foregrounds alpha as "mask".
-def ApplyAlpha(Foreground, Operator, Background, currentY, TestEntity):
-        #0 = transparent, 255 = opaque
-        #Create PictureOut as an output buffer
-        PictureOut = np.zeros((len(Foreground[currentY]), 4), dtype=np.uint8)
+            #If the current pixel is free
+            if FreeLine[CurrentX + X_Offset] == True:
 
+                if Foreground[CurrentX][3] == 0:
+                    PictureOut[CurrentX + X_Offset] = Foreground[CurrentX]
+                    TestEntity.AlphaPassed += 1
 
-        #For each pixel in the picture, apply the alpha value
-        if (Operator == ("Over" or "over")):
-            for CurrentX in range (len(Foreground[0])):
-                
-                if Foreground[currentY][CurrentX][3] == 0:
-                    PictureOut[CurrentX] = Foreground[currentY][CurrentX]
-                    #TestEntity.AlphaPassed += 1
                 else:
-                        
-                    #map the foreground alpha value to a range of 0 to 1. This is done to avoid floating point errors.
-                    #wtf skjer her? bugga bajs
-                    Alpha = np.asarray(Foreground[currentY][CurrentX][3])
+                            
+                        #map the foreground alpha value to a range of 0 to 1. This is done to avoid floating point errors.
+                        #wtf skjer her? bugga bajs
+                    Alpha = np.asarray(Foreground[CurrentX][3])
                     AlphaOut = Alpha
                     Alpha = Alpha/255
-                   
                     
-                    #TestEntity.ApplyAlpha += 1
+                        
+                    TestEntity.ApplyAlpha += 1
 
 
 
-                    
-                    Red = AlphaFormula(Foreground[currentY][CurrentX][0], Background[currentY][CurrentX][0], Alpha)
-                    Green = AlphaFormula(Foreground[currentY][CurrentX][1], Background[currentY][CurrentX][1], Alpha)
-                    Blue = AlphaFormula(Foreground[currentY][CurrentX][2], Background[currentY][CurrentX][2], Alpha)
-                    #Combine Red, Green and Blue into PictureOut
-                    PictureOut[CurrentX] = [Red, Green, Blue, AlphaOut]
+                        
+                    Red = AlphaFormula(Foreground[CurrentX][0], Background[CurrentX+X_Offset][0], Alpha)
+                    TestEntity.ApplyAlphaR += 1
+                    Green = AlphaFormula(Foreground[CurrentX][1], Background[CurrentX+X_Offset][1], Alpha)
+                    TestEntity.ApplyAlphaG += 1
+                    Blue = AlphaFormula(Foreground[CurrentX][2], Background[CurrentX+X_Offset][2], Alpha)
+                    TestEntity.ApplyAlphaB += 1
+                        #Combine Red, Green and Blue into PictureOut
+                    PictureOut[CurrentX+X_Offset][0] = Red
+                    PictureOut[CurrentX+X_Offset][1] = Green
+                    PictureOut[CurrentX+X_Offset][2] = Blue
+                    PictureOut[CurrentX+X_Offset][3] = AlphaOut
+                        #PictureOut[CurrentX] = [Red, Green, Blue, AlphaOut]
 
-            return PictureOut
+                FreeLine[CurrentX + X_Offset] = False
 
-        #Ubrukte funksjoner nedenfor.
-        if (Operator == "in"):
-            #not used
-            pass
-        if (Operator == "out"):
-            #not used
-            pass
-        if (Operator == "atop"):
-            #not used
-            pass
-        if (Operator == "xor"):
-            #not used
-            pass
+        return PictureOut, FreeLine
 
 
-    #Ikke testa. ikke viktig atm. drit i hele funksjonen. :)
-def ApplyGammaCorrection(self, Foreground, Background, currentY, Gamma, TestEntity):
-                #StackOverflow'd-ish & Veldig Wikipedia'd.
-        
-        #Buffer
-        PictureOut = np.zeros((len(Foreground[currentY]), 4), dtype=np.uint8)
-        #For each pixel in the picture, apply the alpha value and gamma correction
-        for i in range(len(Foreground)):
-            for j in range(len(Foreground[i])):
-                #Apply the alpha value
-                #feil
-                Alpha = Foreground[currentY][i][3]
-                PictureOut[i][j][3] = Foreground[i][j][3]*Alpha
-                #Apply the gamma correction
-                PictureOut[i][j][0] = Foreground[i][j][0]**Gamma
-                PictureOut[i][j][1] = Foreground[i][j][1]**Gamma
-                PictureOut[i][j][2] = Foreground[i][j][2]**Gamma
-        return PictureOut
-    #Mattematisk formel for gamma-korreksjon:
-    #Co = ((Ca**(1/gamma)*Aa + Cb**(1/gamma)*Ab*(1-Aa))/Ao)**(gamma)
+#Put alpha value into the input picture, which is in format (800, 4). The input also contains the alpha value to put in
+def PutAlpha (Picture, Alpha):
+    PictureOut = np.zeros((len(Picture),len(Picture[0]), 4), dtype=np.uint8)
+    for j in range (len(Picture)):
+        for i in range(len(Picture[0])):
+            PictureOut[j][i][0] = Picture[j][i][0]
+            PictureOut[j][i][1] = Picture[j][i][1]
+            PictureOut[j][i][2] = Picture[j][i][2]
+            PictureOut[j][i][3] = Alpha
 
-
-#
+    return PictureOut

@@ -1,33 +1,38 @@
+#A test class with attributes that measures times a function has been used.
+
+#Length is the y-length of the screen.
+
 class OperationsCounter():
-    def __init__(self):
+    def __init__(self, Length):
+        self.Length = Length
         #Alpha
+        self.CurrTime = [0]*Length
         #Redundant v
-        CheckAlpha = 0
+        self.CheckAlpha = [0]*Length
 
-        ApplyAlphaInit = 0
+        self.ApplyAlphaInit = 0*Length
 
-        ApplyAlpha = 0
-        
-        #If induvidual channel (different BPP) used later. Not currently used.
-        ApplyAlphaR = 0
-        ApplyAlphaG = 0
-        ApplyAlphaB = 0
-        
-        ApplyAlphaOperation = 0
+        self.ApplyAlpha = 0*Length
+        #self.ApplyAlphaWithGammaCorrection = 0*Length
+        self.AlphaPassed = 0*Length
+            
+        self.ApplyAlphaR = 0*Length
+        self.ApplyAlphaG = 0*Length
+        self.ApplyAlphaB = 0*Length
+            
+        self.ApplyAlphaOperation = 0*Length
 
-        ApplyMask = 0
-        ApplyNoMask = 0
+        self.ApplyMask = 0*Length
+        self.NoMask = 0*Length
 
-        ModifyCLUT = 0
-        ApplyCLUT = 0
+        self.ModifyCLUT = 0*Length
+        self.ApplyCLUT = 0*Length
 
-        RAM_get = 0
-        RAM_put = 0
-        RAM_clear = 0
-        RAM_get_error = 0
-        RAM_get_DataFound = 0
-        RAM_get_DataNotFound = 0
-        RAM_get_get = 0
-
-
-        
+        self.RAM_get = 0*Length
+        self.RAM_put = 0*Length
+        self.RAM_clear = 0*Length
+        self.RAM_get_error = 0*Length
+        self.RAM_get_DataFound = 0*Length
+        self.RAM_get_DataNotFound = 0*Length
+        self.RAM_get_get = 0*Length
+        self.RAM_check = 0*Length

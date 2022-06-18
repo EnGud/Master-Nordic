@@ -1,13 +1,15 @@
 
-import Scene_Descriptor, AlphaBlending, AlphaMasking, OperationsCounter, Dynamic_RAM, Analytics, Bits_Per_Pixel, CLUT, Scene_Descriptor
+import Scene_Descriptor, AlphaBlending, AlphaMasking, OperationsCounter, Dynamic_RAM, Analytics, CLUT, Scene_Descriptor
 
 from PIL import Image
 import numpy as np
 import threading
+import Analytics
 #Limitation: Every picture needs an alpha
 
 
-TestEntity = OperationsCounter.OperationsCounter()
+TestEntity = OperationsCounter.OperationsCounter(600)
+TestEntity.Length = 600 
 # Manual fix
 #Bærbar
 #BufferedPicture1 = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp")
@@ -20,96 +22,81 @@ TestEntity = OperationsCounter.OperationsCounter()
 BufferedPicture1 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp"))
 BufferedPicture2 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Overlegg.bmp"))
 BufferedPicture3 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Alternativ.bmp"))
+#BUFFER EQUALS SAVED ON FLASH/DISK/WHATEVER
+
 
 #Generate Outputbuffer Array with the same y length as AlphaedPicture
 
 
-BufferedMask = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Graas.bmp")
+BufferedMask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Graas.bmp"))
 BufferedMask1 = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Stjerne.bmp")
 
+FreeLine = [True]*800
 
+Histogram = [0]*600
 
-
-#Tests
-
-#Blending test
 AlphaTest = False
 if AlphaTest == True:
+    AlphaedPictureOut = np.zeros((600, 800, 4), dtype=np.uint8)
+
     AlphaedPicture = AlphaBlending.check_alpha(BufferedPicture1, TestEntity)
+    input()
 
-    for i in range (len(AlphaedPicture)):
-        print(i)
-        AlphaedPicture[i] = AlphaBlending.ApplyAlpha(AlphaedPicture, "Over", BufferedPicture2, i, TestEntity)
+    for CurrentY in range (len(BufferedPicture1)):
+        
+        Picture = AlphaedPicture[CurrentY]
+        PictureBG = BufferedPicture2[CurrentY]
+        #
+        print(CurrentY)
+        
+        AlphaedPictureOut[CurrentY], FreeLine = AlphaBlending.ApplyAlpha(Picture, 0, "Over", PictureBG, FreeLine, TestEntity)
+        #Histogram[i] = TestEntity.ApplyAlpha
+        #TestEntity.ApplyAlpha = 0
 
-    AlphaedPicture = np.asarray(AlphaedPicture)
-    AlphaedPicture = Image.fromarray(AlphaedPicture)
-    AlphaedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_AlphaBlending.bmp")
+    
+        
+
+
+    AlphaedPictureOut = np.asarray(AlphaedPictureOut)
+    AlphaedPictureOut = Image.fromarray(AlphaedPictureOut)
+    AlphaedPictureOut.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_AlphaBlending.bmp")
+    Analytics.PlotHistogram(Histogram)
+    AlphaedPictureOut.show()
 
 
 MaskTest = False
 if MaskTest == True:
     MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
 
-    for i in range (len(BufferedPicture1)):
-        print(i)
-        MaskedPicture[i] = AlphaMasking.ApplyMask(BufferedPicture1, BufferedPicture2, BufferedMask, i, TestEntity)
+    for CurrentY in range (len(BufferedPicture1)):
+        LineMask = BufferedMask[CurrentY]
+        LineBuff1 = BufferedPicture1[CurrentY]
+        LineBuff2 = BufferedPicture2[CurrentY]
+
+        print(CurrentY)
+        MaskedPicture[CurrentY] = AlphaMasking.ApplyMask(LineBuff1, LineBuff2, LineMask, FreeLine, TestEntity)
+        #Histogram[i] = TestEntity.ApplyMask
+        #TestEntity.ApplyMask = 0
     
     MaskedPicture = np.asarray(MaskedPicture)
     MaskedPicture = Image.fromarray(MaskedPicture)
     MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking.bmp")
+    Analytics.PlotHistogram(Histogram)
+    MaskedPicture.show()
 
-
-Both = False
-if Both == True:
-    AlphaedPicture = AlphaBlending.check_alpha(BufferedPicture1, TestEntity)
-    MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
-    BufferedPicture3 = AlphaBlending.check_alpha(BufferedPicture3, TestEntity)
-
-    for i in range (len(AlphaedPicture)):
-        print(i)
-        AlphaedPicture[i] = AlphaBlending.ApplyAlpha(AlphaedPicture, "Over", BufferedPicture2, i, TestEntity)
-        MaskedPicture[i] = AlphaMasking.ApplyMask(AlphaedPicture, BufferedPicture3, BufferedMask, i, TestEntity)
-
-    MaskedPicture = np.asarray(MaskedPicture)
-    MaskedPicture = Image.fromarray(MaskedPicture)
-    MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking_And_Blending.bmp")
-    
-#CLUT stands for Color Look Up Table
-CLUTTest = False
+    #CLUT stands for Color Look Up Table
+CLUTTest = True
 if CLUTTest == True:
     TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+
     CLUTedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
+
+
     #apply a CLUT on a picture by changing the colour value to the corresponding color value of the CLUT
-    for i in range (len(BufferedPicture1)):
-        print(i)
-        CLUTedPicture[i] = CLUT.ApplyCLUT(BufferedPicture1, TestCLUT, i, TestEntity)
+    for CurrentY in range (len(BufferedPicture1)):
+        print(CurrentY)
+        CLUTedPicture[CurrentY] = CLUT.ApplyCLUT(BufferedPicture1[CurrentY], TestCLUT, FreeLine, TestEntity)
 
     CLUTedPicture = np.asarray(CLUTedPicture)
     CLUTedPicture = Image.fromarray(CLUTedPicture)
     CLUTedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_CLUT.bmp")
-
-All = True
-if All == True:
-    TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
-    CLUTedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
-
-    for i in range (len(BufferedPicture1)):
-        print(i)
-        CLUTedPicture[i] = CLUT.ApplyCLUT(BufferedPicture1, TestCLUT, i, TestEntity)
-        
-
-    AlphaedPicture = AlphaBlending.check_alpha(CLUTedPicture, TestEntity)
-    
-    MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
-    BufferedPicture3 = AlphaBlending.check_alpha(BufferedPicture3, TestEntity)
-
-
-
-    for i in range (len(CLUTedPicture)):
-        print(i)
-        AlphaedPicture[i] = AlphaBlending.ApplyAlpha(AlphaedPicture, "Over", BufferedPicture2, i, TestEntity)
-        MaskedPicture[i] = AlphaMasking.ApplyMask(AlphaedPicture, BufferedPicture3, BufferedMask, i, TestEntity)
-
-    MaskedPicture = np.asarray(MaskedPicture)
-    MaskedPicture = Image.fromarray(MaskedPicture)
-    MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking_And_Blending_And_CLUT.bmp")
