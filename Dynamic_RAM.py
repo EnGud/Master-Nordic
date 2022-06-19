@@ -27,6 +27,13 @@ class RAM:
         print("No space left in the RAM")
         return -1
 
+    #Put data in specific RAM adress
+    def put_specific(self, adress, data, TestEntity):
+        self.data[adress] = data
+        self.dataoccupied[adress] = True
+        TestEntity.RAM_put += 1
+        return adress
+
 
 
 # it will contain a function to get data from ram by a given adress.
@@ -35,13 +42,13 @@ class RAM:
 
         #check if the adress is in the ram
         #If not in RAM
-        if self.data[adress] == None or self.dataoccupied[adress] == False:
+        if self.dataoccupied[adress] == False:
             print("Data not in the RAM")
             TestEntity.RAM_get_DataNotFound += 1
             return -1
 
         #If in RAM
-        elif self.data[adress] != None and self.dataoccupied[adress] == True:
+        elif self.dataoccupied[adress] == True:
             TestEntity.RAM_get += 1
             return self.data[adress]
 
@@ -54,10 +61,20 @@ class RAM:
 
 #It will contain a function to clear out the data and dataoccupied arrays to make them empty in a given adress
     def clear(self, adress, TestEntity):
-        self.data[adress] = None
-        self.dataoccupied[adress] = False
-        TestEntity.RAM_clear += 1
-        return True
+        if adress == "All":
+            for i in range(len(self.dataoccupied)):
+                self.data[i] = None
+                self.dataoccupied[i] = False
+                TestEntity.RAM_clear += 1
+            return 0
+        else:
+            self.data[adress] = None
+            self.dataoccupied[adress] = False
+            TestEntity.RAM_clear += 1
+
+            #If commando "All", clear all data in the ram.
+            
+            return True
 
 
 #it will contain a function to check how much of the ram is used
@@ -67,7 +84,7 @@ class RAM:
         for i in range(len(self.dataoccupied)):
             if self.dataoccupied[i] == True:
                 count += 1
-        print("There are", count, "data in the RAM")
+        #print("There are", count, "data in the RAM")
         #TestEntity.RAM_check += 1
         return count
 
@@ -83,15 +100,18 @@ class RAM:
                 for j in range(len(self.data[i])):
                     DataBits += len(self.data[i][j])
                 DataSize = (DataArray * DataBits)
-        print("There are", DataSize, "databits in the RAM")
+        #print("There are", DataSize, "databits in the RAM")
         return DataSize
 
 
 
 #Store a Y-axis of a picture in ram
-def StorePicInRam(Structure, CurrentY, RAM_Entity, TestEntity):
-    #Save the current line of the active picture in the RAM.
-    #
-    if (CurrentY < Structure.PictureSize[1] + Structure.PictureOffset[1]) and (CurrentY >= Structure.PictureOffset[1]):
-        Structure.Picture_RAM_Adress = RAM_Entity.put(Structure.Picture[CurrentY-Structure.PictureOffset[1]], TestEntity)
+    def StorePictureInRam(self, Structure, CurrentY, RAM_Entity, TestEntity):
+        #Save the current line of the active picture in the RAM.
+        #
+        if (CurrentY < Structure.PictureSize[1] + Structure.PictureOffset[1]) and (CurrentY >= Structure.PictureOffset[1]):
+            Structure.Picture_RAM_Adress = RAM_Entity.put(Structure.Picture[CurrentY-Structure.PictureOffset[1]], TestEntity)
+            Structure.PictureStoredInRam = True
+        else:
+            Structure.PictureStoredInRam = False
 

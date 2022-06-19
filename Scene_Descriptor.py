@@ -29,9 +29,11 @@ class SceneDescriptor:
         Self.SizeX = ResolutionX
         Self.SizeY = ResolutionY
         Self.Layer = layer
+        Self.DrawOverBG = True
 
         Self.Picture = [[]]
-        Self.PictureSize = [0,0]
+        Self.PictureSize = [ResolutionX, ResolutionY]
+        Self.PictureStoredInRam = False
         Self.Picture_RAM_Adress = 0
 
         Self.Next = None

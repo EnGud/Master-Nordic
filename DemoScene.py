@@ -6,7 +6,6 @@ import OperationsCounter
 import Dynamic_RAM
 import CLUT
 from PIL import Image
-import Misc_Operations
 import Analytics
 import numpy as np
 import threading
@@ -30,96 +29,138 @@ ScreenResolutionX = MenusConstructor.ScreenResolutionX
 ScreenResolutionY = MenusConstructor.ScreenResolutionY
 
 #Setup
-TestEntity = OperationsCounter.OperationsCounter(ScreenResolutionY)
+TestEntity = OperationsCounter.OperationsCounter(ScreenResolutionY, ScreenResolutionX)
 StateMachineStatus = "Main"
 OutputBuffer = np.zeros((ScreenResolutionX, 4), dtype=np.uint8)
 OutputBufferLarge = np.zeros((ScreenResolutionY, ScreenResolutionX, 4), dtype=np.uint8)
 
-RAM=Dynamic_RAM.RAM(32, TestEntity)
+RAM=Dynamic_RAM.RAM(16, TestEntity)
 TestWithTime = True
 #Use Scene_Descriptor to build the scene through a function
 
 
-def Render(Items, CurrentY, RAM):
-    FreeLine = [True]*ScreenResolutionX
-    #MainMenu
-    #.Items
+def Render(Items, CurrentY, RAM, TestEntity):
+    TestEntity.FreeLine = [True]*ScreenResolutionX
+    LineBufferAdress = RAM.put(np.zeros((ScreenResolutionX, 4), dtype=np.uint8), TestEntity)
 
-    DrawnCurrentLine = False
-
-    #VI STARTER MED EN TOM X-ARRAY MED STØRRELSE SKJERMEN
-    PictureOut = np.zeros((ScreenResolutionX, 4), dtype=np.uint8)
-    #PictureOutAdress = Dynamic_RAM.put(PictureOut, TestEntity)
-    #Traverse linked list
     CurrentItem = Items[len(Items)-1]
     while CurrentItem.Next != None:
-        #Pointer
-        Structure = CurrentItem
+        TestEntity.CurrentLayer = CurrentItem.Layer
+    #Start fra øverste lag, iterer nedover.
+        
+        RAM.StorePictureInRam(CurrentItem, CurrentY, RAM, TestEntity)
+        if CurrentY == 200:
+            pass
+        #Sjekk om noen operasjoner skal utføres
+        #om ja: Hent linjebuffer
+        #utfør CLUT-operasjoner 
+        #Merk av FreeLine for hvert pixel som nå er modifisert
+        #utfør AlphaBlending-operasjone
+        #Freeline
+        #utfør AlphaMasking-operasjoner
+        #Freeline
 
-        Dynamic_RAM.StorePicInRam(CurrentItem, CurrentY, RAM, TestEntity)
-        #print(CurrentItem.Picture_RAM_Adress)
-        #RAM.check(TestEntity)
-        #RAM.CheckEveryArrayBit(TestEntity)
+        #For hver freeline som ikke er berørt, tegn bakgrunnen
+        #
+        #Returner ut linja
+        if CurrentY == 200:
+            pass
+        LineBuffer = RAM.get(LineBufferAdress, TestEntity)
+        #Dersom nåværende lag er innenfor Y, gitt offset
+        if ((CurrentY >= CurrentItem.PictureOffset[1]) and (CurrentY < CurrentItem.PictureOffset[1] + CurrentItem.PictureSize[1])):
+                
+            
+
+            if(CurrentItem.ApplyCLUT):
+                    #put_specific(self, adress, data, TestEntity):
+                    #ApplyCLUT(Picture, CLUT, X_Offset, TestEntity):
+                    #RAM.put_specific(LineBufferAdress, CLUT.ApplyCLUT(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.CLUT, CurrentItem.PictureOffset[0], TestEntity), TestEntity)
+
+                    CLUTBuff = CLUT.ApplyCLUT(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.CLUT, CurrentItem.PictureOffset[0], TestEntity)
+                    #Items[1].DrawOverBG = True
+                    for x in range (ScreenResolutionX):
+                        if TestEntity.FreeLine[x] == False:
+                            LineBuffer[x] = CLUTBuff[x]
+
+
+                
+
+            if(CurrentItem.ApplyMask):
+                    #ApplyMask(PictureFG, X_Offset, PictureBG, Mask, TestEntity):
+
+                    MaskBuff = AlphaMasking.ApplyMask(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.PictureOffset[0], Items[1].Picture[CurrentY], CurrentItem.Mask[CurrentY-CurrentItem.PictureOffset[1]], TestEntity)
+                    #Items[1].DrawOverBG = True
+                    for x in range (ScreenResolutionX):
+                        if TestEntity.FreeLine[x] == False:
+                            LineBuffer[x] = MaskBuff[x]
+
+
+
+
+            if(CurrentItem.ApplyAlpha):
+                    #ApplyAlpha (Foreground, X_Offset, Operator, Background, TestEntity):
+                if(CurrentItem.ApplyMask):
+                    AlphaBuff = AlphaMasking.ApplyMask(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.PictureOffset[0], Items[1].Picture[CurrentY], CurrentItem.Mask[CurrentY-CurrentItem.PictureOffset[1]], TestEntity)
+                    #Items[1].DrawOverBG = True
+                    Temp = RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity)
+                    
+                    for x in range (len(Temp)):
+                        if TestEntity.FreeLine[x+CurrentItem.PictureOffset[0]] == False:
+                            Temp[x] = AlphaBuff[x + CurrentItem.PictureOffset[0]]
+                    RAM.put_specific(CurrentItem.Picture_RAM_Adress, Temp, TestEntity)
+                
+                else:
+                    AlphaBuff = AlphaBlending.ApplyAlpha(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.PictureOffset[0], "Over", Items[1].Picture[CurrentY], TestEntity)
+                    #Items[1].DrawOverBG = True
+                    for x in range (ScreenResolutionX):
+                        if TestEntity.FreeLine[x] == False:
+                            LineBuffer[x] = AlphaBuff[x]
 
 
 
         
-        #
+               
 
-        #Hvis CurrentY er innenfor nåværendes bilde-lag
-        if ((CurrentY >= Structure.PictureOffset[1]) and (CurrentY < Structure.PictureOffset[1] + Structure.PictureSize[1])): 
-            #Dynamic_RAM.StorePicInRam(CurrentItem, CurrentY, RAM, TestEntity)
-            #RAM.check(TestEntity)
-            #RAM.CheckEveryArrayBit(TestEntity)
-            #Sjekk om CLUT skal utføres
-            if(Structure.ApplyCLUT):
-                #Utfør CLUT
-                #ApplyCLUT(Picture, CLUT, FreeLine, TestEntity):
-                #RAM.get(PictureAdress, TestEntity)
-                PictureOut, FreeLine = CLUT.ApplyCLUT(Structure.Picture[CurrentY-Structure.PictureOffset[1]], Structure.CLUT, Structure.PictureOffset[0], FreeLine, ScreenResolutionX, TestEntity)
-                #RAM.put(Picture, TestEntity)
-
-            if(Structure.ApplyMask):
-            #            #Generate MaskedPicture as empty image with size of picture
-            #ApplyMask(PictureFG, X_Offset, PictureBG, Mask, FreeLine, TestEntity):
-            #Mask must match PictureFG.
-                PictureOut, FreeLine = AlphaMasking.ApplyMask(Structure.Picture[(CurrentY-Structure.PictureOffset[1])], Structure.PictureOffset[0], Items[1].Picture[CurrentY], Structure.Mask[CurrentY-Structure.PictureOffset[1]], FreeLine, OperationsCounter)
-            #    Structure.Picture[CurrentY] = AlphaMasking.ApplyMask(Structure.Picture, Items.Array[0].Picture, Structure.PictureInfo.Mask , CurrentY, TestEntity)
-
-            #Sjekk om Alpha Blending skal utføres
-            if(Structure.ApplyAlpha):
-                #Utfør Alpha Blending
-                #ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity):
-                #Picture = RAM.get(Structure.Picture_RAM_Adress, TestEntity)
-                #RAM Eksempel
-                #PictureOut = AlphaBlending.ApplyAlpha(RAM.get(Structure.Picture_RAM_Adress, TestEntity), "over", Items[0].Picture_RAM_Adress, FreeLine, TestEntity)
-                #Dynamic_RAM.StorePicInRam(Items[0].Picture, CurrentY, RAM, TestEntity)
-                PictureOut, FreeLine = AlphaBlending.ApplyAlpha(Structure.Picture[(CurrentY-Structure.PictureOffset[1])], Structure.PictureOffset[0], "Over", Items[1].Picture[CurrentY], FreeLine, TestEntity)
-                #Structure.Picture_RAM_Adress = RAM.put(Picture_RAM_Adress, TestEntity)
-
-            
-
-
-        #Apply Background to every FreeLine bit
-        for x in range(ScreenResolutionX):
-            if(FreeLine[x] == True):
-                PictureOut[x] = Items[1].Picture[CurrentY][x]
-
-
-        #Remove when testing with time.
-
-
-        RAM.clear(CurrentItem.Picture_RAM_Adress, TestEntity)
+        RAM.put_specific(LineBufferAdress, LineBuffer, TestEntity)
 
         CurrentItem = CurrentItem.Next
 
-    if TestWithTime == False:
-        TestEntity.RAM_Used[CurrentY] = RAM.check(TestEntity)
-        TestEntity.RAM_Used_Bits[CurrentY] = RAM.CheckEveryArrayBit(TestEntity)
     
-    return PictureOut
+    #Draw background
+    CurrentItem = Items[1]
+    TestEntity.CurrentLayer = CurrentItem.Layer
+    #Functions below could be moved to a separate file/whatever. Saves space and looks prettier. No time atm!
+
+    RAM.StorePictureInRam(CurrentItem, CurrentY, RAM, TestEntity)
+
+    if(CurrentItem.ApplyCLUT):
+
+        Buff = CLUT.ApplyCLUT(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.CLUT, CurrentItem.PictureOffset[0], TestEntity)
+        Temp = RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity) 
+        for x in range (ScreenResolutionX):
+            #Knotete INC.
+            Temp[x] = Buff[x]
+        RAM.put_specific(CurrentItem.Picture_RAM_Adress, Temp, TestEntity)
+
+    
 
         
+
+    for x in range(ScreenResolutionX):
+        if(TestEntity.FreeLine[x] == True): 
+            LineBuffer[x] = Items[1].Picture[CurrentY][x]
+
+    
+
+                
+
+        
+    return RAM.get(LineBufferAdress, TestEntity), TestEntity
+
+
+
+
+
 
 
 Runs = 0 
@@ -127,6 +168,7 @@ while(1):
 
     #Use a state machine to control the flow of the program. Start with MainMenu, let it iterate for 3 cycles, then go to SettingsMenu. Let it run for two cycles then go to SubSettingsMenu. Let it run for two cycles then go to OrderCoffee. Let it run for three cycles then go to MainMenu. Try to implement threading on Render()
     if (StateMachineStatus == "Main"):
+        Analytics.Clean(TestEntity)
         #MainMenu Build bygges ikke realtime! Bytt ut med å lagre en kopi av MainMenu i RAM eller noe.
         MainMenu = MenusConstructor.MainMenuBuild(TestEntity)
         #Render MainMeny for the length of ScreenResolutionY
@@ -138,8 +180,9 @@ while(1):
 
             #MainLoop for render
             StartTime = time.time()
-            OutputBuffer = Render(MainMenu, CurrentY, RAM)
+            OutputBuffer, TestEntity = Render(MainMenu, CurrentY, RAM, TestEntity)
             EndTime = time.time()
+            RAM.clear("All", TestEntity)
             #End MainLoop
 
             TestEntity.TimeTaken[CurrentY] = EndTime - StartTime
@@ -154,7 +197,7 @@ while(1):
         
     #Print TestEntity into Histogram
 
-        Analytics.histogram_alt(TestEntity.TimeTaken)
+        Analytics.histogram(TestEntity.TimeTaken)
 
 
         #draw OutputBufferLarge to screen
@@ -163,17 +206,130 @@ while(1):
         OutputBufferPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_DemoScene.bmp")
         #OutputBufferPicture.show()
         print("PrintedPicture")
-        NewPictureReady = False
-
 
         #Run MainMenu for 3 cycles
         Runs += 1
         del MainMenu
-        if (Runs >= 2):
+        if (Runs >= 1):
             StateMachineStatus = "SettingsMenu"
             Runs = 0
             #Hmm
+
+
+    if (StateMachineStatus == "SettingsMenu"):
+        Analytics.Clean(TestEntity)
+        #MainMenu Build bygges ikke realtime! Bytt ut med å lagre en kopi av MainMenu i RAM eller noe.
+        SettingsMenu = MenusConstructor.SettingsMenuBuild(TestEntity)
+        #Render MainMeny for the length of ScreenResolutionY
+        #Start timing
+        TestWithTime = True
+        StartTime = time.time()
+        for CurrentY in range(ScreenResolutionY):
+            TestEntity.CurrentY = [CurrentY]
+
+            #MainLoop for render
+            StartTime = time.time()
+            OutputBuffer, TestEntity = Render(SettingsMenu, CurrentY, RAM, TestEntity)
+            EndTime = time.time()
+            TestEntity.RAM_Used = RAM.check(TestEntity)
+            TestEntity.RAM_Used_Bits = RAM.CheckEveryArrayBit(TestEntity)
+            RAM.clear("All", TestEntity)
+            #End MainLoop
+
+
+            Analytics.Testing(TestEntity, CurrentY)
+
+            Analytics.Clean(TestEntity)
+
+
+
+            #OutputBufferLarge is only used to visualize the picture. NOT FOR THE ACTUAL MEASUREMENTS OF LINE TIMINGS!
+            OutputBufferLarge[CurrentY] = OutputBuffer
+            
+            #Lagre større buffer, kun for visualisering/verifisering.
+
+        #Stop timing
         
+        #Calculate time taken
+        
+    #Print TestEntity into Histogram
+    #Manuelle histogram. fuck it.
+
+        Analytics.histogram(TestEntity.TimeTaken)
+        Analytics.Analyze(TestEntity)
+
+
+        #draw OutputBufferLarge to screen
+
+        OutputBufferPicture = Image.fromarray(OutputBufferLarge)
+        OutputBufferPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_DemoScene_SettingsMenu.bmp")
+
+        Runs += 1
+        del SettingsMenu
+        if (Runs >= 1):
+            StateMachineStatus = "SubSettingsMenu"
+            Runs = 0
+            #Hmm
+        
+
+    if (StateMachineStatus == "SubSettingsMenu"):
+        Analytics.Clean(TestEntity)
+
+        #MainMenu Build bygges ikke realtime! Bytt ut med å lagre en kopi av MainMenu i RAM eller noe.
+        SubSettingsMenu = MenusConstructor.SubSettingsMenuBuild(TestEntity)
+        #Render MainMeny for the length of ScreenResolutionY
+        #Start timing
+        TestWithTime = True
+        StartTime = time.time()
+        for CurrentY in range(ScreenResolutionY):
+            TestEntity.CurrentY = [CurrentY]
+
+            #MainLoop for render
+            StartTime = time.time()
+            OutputBuffer, TestEntity = Render(SubSettingsMenu, CurrentY, RAM, TestEntity)
+            EndTime = time.time()
+            RAM.clear("All", TestEntity)
+            #End MainLoop
+
+            TestEntity.TimeTaken[CurrentY] = EndTime - StartTime
+            #OutputBufferLarge is only used to visualize the picture. NOT FOR THE ACTUAL MEASUREMENTS OF LINE TIMINGS!
+            OutputBufferLarge[CurrentY] = OutputBuffer
+            
+            #Lagre større buffer, kun for visualisering/verifisering.
+
+        #Stop timing
+        
+        #Calculate time taken
+        
+    #Print TestEntity into Histogram
+
+        Analytics.histogram(TestEntity.TimeTaken)
+
+
+        #draw OutputBufferLarge to screen
+
+        OutputBufferPicture = Image.fromarray(OutputBufferLarge)
+        OutputBufferPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_DemoScene_SubSettingsMenu.bmp")
+
+        Runs += 1
+        del SubSettingsMenu
+        if (Runs >= 1):
+            StateMachineStatus = "Done"
+            Runs = 0
+            #Hmm
     
     else:
         break
+
+
+
+#Find the Big O of an operation
+""" def BigO(Operation, TimeTaken):
+    #Find the average time taken for the operation
+    AverageTime = sum(TimeTaken)/len(TimeTaken)
+    #Find the Big O of the operation
+    BigO = AverageTime/Operation
+    return BigO """
+
+
+

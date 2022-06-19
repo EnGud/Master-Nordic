@@ -69,7 +69,7 @@ def AlphaFormula(Fg, Bg, Alpha):
         return Fg*Alpha + Bg*(1-Alpha)
 
 #Create a function that blends two pictures together, using foregrounds alpha as "mask".
-def ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity):
+def ApplyAlpha (Foreground, X_Offset, Operator, Background, TestEntity):
     #The input Foreground is a picture of x length with a x offset relative to background. Background is a picture of another length.
     #The output is a picture of the same length as the background, but with the foreground applied.
     if (Operator == ("Over" or "over")):
@@ -78,7 +78,7 @@ def ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity
             
 
             #If the current pixel is free
-            if FreeLine[CurrentX + X_Offset] == True:
+            if TestEntity.FreeLine[CurrentX + X_Offset] == True:
 
                 if Foreground[CurrentX][3] == 0:
                     PictureOut[CurrentX + X_Offset] = Foreground[CurrentX]
@@ -93,10 +93,7 @@ def ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity
                     Alpha = Alpha/255
                     
                         
-                    TestEntity.ApplyAlpha += 1
-
-
-
+                    TestEntity.ApplyAlpha_Pixel += 1
                         
                     Red = AlphaFormula(Foreground[CurrentX][0], Background[CurrentX+X_Offset][0], Alpha)
                     TestEntity.ApplyAlphaR += 1
@@ -110,10 +107,10 @@ def ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity
                     PictureOut[CurrentX+X_Offset][2] = Blue
                     PictureOut[CurrentX+X_Offset][3] = AlphaOut
                         #PictureOut[CurrentX] = [Red, Green, Blue, AlphaOut]
-
-                FreeLine[CurrentX + X_Offset] = False
-
-        return PictureOut, FreeLine
+                if TestEntity.CurrentLayer != 0:
+                    TestEntity.FreeLine[CurrentX + X_Offset] = False
+        TestEntity.AlphaBlend += 1
+    return PictureOut
 
 
 #Put alpha value into the input picture, which is in format (800, 4). The input also contains the alpha value to put in

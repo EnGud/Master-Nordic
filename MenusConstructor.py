@@ -18,9 +18,9 @@ ScreenResolutionY = 600
 
 
 
-def MainMenuBuild():
+def MainMenuBuild(TestEntity):
     #Todo: Error if picture is larger than screen for every layer/picture.
-
+    
     MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
 
     MainMenuBG.Exists = 1    
@@ -30,10 +30,13 @@ def MainMenuBuild():
     #set background to screen resolution
     #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
     #MainMenuBG.Picture = AlphaBlending.PutAlpha(np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield.bmp")), 120)
-    MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield.bmp")
+    #MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield_1280_900.bmp")
+    MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp")
     MainMenuBG.Picture = np.asarray(MainMenuBG.Picture.convert('RGBA'))
     MainMenuBG.PictureSize = [ScreenResolutionX, ScreenResolutionY]
-
+    MainMenuBG.ApplyCLUT = False
+    MainMenuBG.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+    #MainMenuBG.DrawOverBG = False
 
     if ((MainMenuBG.PictureSize[1] <= ScreenResolutionY) and (MainMenuBG.PictureSize[0]) <= ScreenResolutionX):
         pass
@@ -78,12 +81,13 @@ def MainMenuBuild():
     MainMenu3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp")
     MainMenu3.Picture = MainMenu3.Picture.convert('RGBA')
     MainMenu3.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu3.Picture), 120)
-
+    
     MainMenu3.PictureOffset = [0, 200]
     MainMenu3.ApplyAlpha = True
     MainMenu3.Picture = AlphaBlending.PutAlpha(MainMenu3.Picture, 120)
 
-
+    #MainMenu3.ApplyCLUT = True
+    #MainMenu3.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
     MainMenuEnd = Scene_Descriptor.Empty
 
 
@@ -93,11 +97,111 @@ def MainMenuBuild():
     #Create a linked list
     MainMenu3.Next = MainMenu2
     MainMenu2.Next = MainMenu1
-    MainMenu1.Next = MainMenuBG
-    MainMenuBG.Next = MainMenuEnd
+    MainMenu1.Next = MainMenuEnd
+    #MainMenuBG.Next = MainMenuEnd
     MainMenuEnd.Next = None
 
+    TestEntity.ScenesConstructed += 1
     return MainMenu, MainMenuBG, MainMenu1, MainMenu2, MainMenu3
+
+
+
+
+
+
+
+MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
+
+#Construct Settings Menu
+#Tips: always include mask for text. Match the mask with a blackout of the text.
+def SettingsMenuBuild(TestEntity):
+    SettingsMenuBuild = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
+    
+    SettingsMenuBuild.Exists = 1
+
+    #set background to screen resolution
+    #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
+    SettingsMenuBuild.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SettingsBackground.bmp")
+    SettingsMenuBuild.Picture = np.asarray(SettingsMenuBuild.Picture.convert('RGBA'))
+    SettingsMenuBuild.PictureSize = [ScreenResolutionX, ScreenResolutionY]
+    SettingsMenuBuild.ApplyCLUT = False
+    SettingsMenuBuild.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+
+
+
+    if ((SettingsMenuBuild.PictureSize[1] <= ScreenResolutionY) and (SettingsMenuBuild.PictureSize[0]) <= ScreenResolutionX):
+        pass
+    else:
+        print("Error! Picture is not the same size as the screen resolution. The background needs to fit the screen.")
+        exit()
+    
+    #Buffer Picture 1
+    SettingsMenuBuild1 = Scene_Descriptor.SceneDescriptor(1, 400, 200)
+    SettingsMenuBuild1.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Sub-Settings_400_200.bmp")
+    SettingsMenuBuild1.Picture = SettingsMenuBuild1.Picture.convert('RGBA')
+    SettingsMenuBuild1.Picture = AlphaBlending.PutAlpha(np.asarray(SettingsMenuBuild1.Picture), 200)
+    SettingsMenuBuild1.PictureOffset = [0, 100]
+    SettingsMenuBuild1.ApplyCLUT = False
+    SettingsMenuBuild1.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+
+
+    #MainMenu1.ApplyCLUT = True
+    SettingsMenuBuild1.ApplyMask = True
+    SettingsMenuBuild1.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Sub-Settings_400_200.bmp"))
+    
+
+    #Buffer Picture 2
+    SettingsMenuBuild2 = Scene_Descriptor.SceneDescriptor(2, 200, 100)
+    SettingsMenuBuild2.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Temperatur_200_100.bmp")
+    SettingsMenuBuild2.Picture = SettingsMenuBuild2.Picture.convert('RGBA')
+    SettingsMenuBuild2.Picture = AlphaBlending.PutAlpha(np.asarray(SettingsMenuBuild2.Picture), 200)
+    SettingsMenuBuild2.ApplyMask = True
+    SettingsMenuBuild2.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Temperatur_200_100.bmp"))
+
+    SettingsMenuBuild2.ApplyAlpha = True
+    
+    SettingsMenuBuild2.PictureOffset = [300, 500]
+
+
+    #Buffer Picture 3
+    SettingsMenuBuild3 = Scene_Descriptor.SceneDescriptor(3, 300, 100)
+    SettingsMenuBuild3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp")
+    SettingsMenuBuild3.Picture = SettingsMenuBuild3.Picture.convert('RGBA')
+    SettingsMenuBuild3.Picture = AlphaBlending.PutAlpha(np.asarray(SettingsMenuBuild3.Picture), 50)
+    SettingsMenuBuild3.PictureOffset = [500, 500]
+
+    SettingsMenuBuild3.ApplyMask = True
+    SettingsMenuBuild3.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp"))
+
+    #Buffer Picture 4
+    SettingsMenuBuild4 = Scene_Descriptor.SceneDescriptor(4, 200, 100)
+    SettingsMenuBuild4.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Tilbake_200_100.bmp")
+    SettingsMenuBuild4.Picture = SettingsMenuBuild4.Picture.convert('RGBA')
+    SettingsMenuBuild4.Picture = AlphaBlending.PutAlpha(np.asarray(SettingsMenuBuild4.Picture), 0)
+    SettingsMenuBuild4.PictureOffset = [500, 100]
+
+    SettingsMenuBuild4.ApplyMask = True
+    SettingsMenuBuild4.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Tilbake_200_100.bmp"))
+
+    SettingsMenuBuildEnd = Scene_Descriptor.Empty
+
+    SettingsMenu = Scene_Descriptor.SceneItems
+    SettingsMenu.Array = [SettingsMenuBuild, SettingsMenuBuild1, SettingsMenuBuild2, SettingsMenuBuild3, SettingsMenuBuild4]
+
+    #Create a linked list
+    SettingsMenuBuild4.Next = SettingsMenuBuild3
+    SettingsMenuBuild3.Next = SettingsMenuBuild2
+    SettingsMenuBuild2.Next = SettingsMenuBuild1
+    SettingsMenuBuild1.Next = SettingsMenuBuildEnd
+    #SettingsMenuBuild.Next = SettingsMenuBuildEnd
+    SettingsMenuBuildEnd.Next = None
+
+    TestEntity.ScenesConstructed += 1
+
+    SettingsMenu = Scene_Descriptor.SceneItems
+    SettingsMenu.Array = [SettingsMenuBuild, SettingsMenuBuild1, SettingsMenuBuild2, SettingsMenuBuild3, SettingsMenuBuild4]
+    
+    return SettingsMenu, SettingsMenuBuild, SettingsMenuBuild1, SettingsMenuBuild2, SettingsMenuBuild3, SettingsMenuBuild4
 
     #while structure.Next != None:
     #Render the operations
@@ -108,11 +212,85 @@ def MainMenuBuild():
 
 
 
-MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
 
-#Construct Settings Menu
-def SettingsMenuBuild():
-    MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
+
+#Construct Subsettings Menu
+def SubSettingsMenuBuild(TestEntity):
+
+    SubSettingsMenuBuild = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
+
+    SubSettingsMenuBuild.Exists = 1
+    #SubSettingsMenu.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
+    SubSettingsMenuBuild.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SubSettingsBackground.bmp")
+    SubSettingsMenuBuild.Picture = np.asarray(SubSettingsMenuBuild.Picture.convert('RGBA'))
+    SubSettingsMenuBuild.PictureSize = [ScreenResolutionX, ScreenResolutionY]
+
+    SubSettingsMenuBuild.ApplyCLUT = True
+    SubSettingsMenuBuild.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+
+
+    SubSettingsMenuBuild1 = Scene_Descriptor.SceneDescriptor(1, 800, 600)
+    SubSettingsMenuBuild1.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp")
+    SubSettingsMenuBuild1.Picture = SubSettingsMenuBuild1.Picture.convert('RGBA')
+    SubSettingsMenuBuild1.Picture = AlphaBlending.PutAlpha(np.asarray(SubSettingsMenuBuild1.Picture), 200)
+
+    SubSettingsMenuBuild1.ApplyMask = True
+    SubSettingsMenuBuild1.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Stjerne.bmp"))
+
+    SubSettingsMenuBuild2 = Scene_Descriptor.SceneDescriptor(2, 800, 600)
+    SubSettingsMenuBuild2.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/NothingToSeeHere_800_600.bmp")
+    SubSettingsMenuBuild2.Picture = SubSettingsMenuBuild2.Picture.convert('RGBA')
+    SubSettingsMenuBuild2.Picture = AlphaBlending.PutAlpha(np.asarray(SubSettingsMenuBuild2.Picture), 200)
+
+    SubSettingsMenuBuild2.ApplyMask = True
+    SubSettingsMenuBuild2.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/NothingToSeeHere_800_600.bmp"))
+
+
+
+    SubSettingsMenuBuild3 = Scene_Descriptor.SceneDescriptor(3, 400, 200)
+    SubSettingsMenuBuild3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/BACK_400_200.bmp")
+    SubSettingsMenuBuild3.Picture = SubSettingsMenuBuild3.Picture.convert('RGBA')
+    SubSettingsMenuBuild3.Picture = AlphaBlending.PutAlpha(np.asarray(SubSettingsMenuBuild3.Picture), 200)
+
+    SubSettingsMenuBuild3.PictureOffset = [int(ScreenResolutionX/2 - 200), int(ScreenResolutionY/2 - 100)]
+    SubSettingsMenuBuild3.ApplyMask = True
+    SubSettingsMenuBuild3.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/BACK_400_200.bmp"))
+
+    SettingsMenu = Scene_Descriptor.SceneItems
+    SettingsMenu.Array = [SubSettingsMenuBuild, SubSettingsMenuBuild1, SubSettingsMenuBuild2, SubSettingsMenuBuild3]
+
+
+    SubSettingsMenuBuildEnd = Scene_Descriptor.Empty
+    #Create a linked list
+    SubSettingsMenuBuild3.Next = SubSettingsMenuBuild2
+    SubSettingsMenuBuild2.Next = SubSettingsMenuBuild1
+    SubSettingsMenuBuild1.Next = SubSettingsMenuBuildEnd
+    #SettingsMenuBuild.Next = SettingsMenuBuildEnd
+    SubSettingsMenuBuildEnd.Next = None
+
+    TestEntity.ScenesConstructed += 1
+
+    SubSettingsMenu = Scene_Descriptor.SceneItems
+    SubSettingsMenu.Array = [SubSettingsMenuBuild, SubSettingsMenuBuild1, SubSettingsMenuBuild2, SubSettingsMenuBuild3]
+    
+    return SubSettingsMenu, SubSettingsMenuBuild, SubSettingsMenuBuild1, SubSettingsMenuBuild2, SubSettingsMenuBuild3
+
+#Order some coffee
+def OrderCoffeeBuild():
+    #OrderCoffeeMenu.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
+    return 0
+
+def PushItToTheLimitDotJPG():
+    #PushItToTheLimit.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
+    return 0
+
+def TestingGrounds():
+    return 0
+
+def LargerScreen(TestEntity):
+    #Todo: Error if picture is larger than screen for every layer/picture.
+    
+    MainMenuBG = Scene_Descriptor.SceneDescriptor(0, 1280, 900)
 
     MainMenuBG.Exists = 1    
     #MainMenu1.Layer = 0
@@ -120,9 +298,13 @@ def SettingsMenuBuild():
 
     #set background to screen resolution
     #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
-    MainMenuBG.Picture = AlphaBlending.PutAlpha(np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp")), 120)
+    #MainMenuBG.Picture = AlphaBlending.PutAlpha(np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield.bmp")), 120)
+    MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield_1280_900.bmp")
+    MainMenuBG.Picture = np.asarray(MainMenuBG.Picture.convert('RGBA'))
     MainMenuBG.PictureSize = [ScreenResolutionX, ScreenResolutionY]
-
+    MainMenuBG.ApplyCLUT = False
+    MainMenuBG.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+    #MainMenuBG.DrawOverBG = False
 
     if ((MainMenuBG.PictureSize[1] <= ScreenResolutionY) and (MainMenuBG.PictureSize[0]) <= ScreenResolutionX):
         pass
@@ -133,7 +315,7 @@ def SettingsMenuBuild():
 
     MainMenu1 = Scene_Descriptor.SceneDescriptor(1, 200, 100)
     MainMenu1.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
-    MainMenu1.Picture = MainMenu1.Picture.convert('RGB')
+    MainMenu1.Picture = MainMenu1.Picture.convert('RGBA')
     MainMenu1.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu1.Picture), 200)
     MainMenu1.PictureSize = [200, 100]
     MainMenu1.PictureOffset = [600, 0]
@@ -148,13 +330,13 @@ def SettingsMenuBuild():
 
     MainMenu2 = Scene_Descriptor.SceneDescriptor(2, 100, 100)
     MainMenu2.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp")
-    MainMenu2.Picture = MainMenu2.Picture.convert('RGB')
+    MainMenu2.Picture = MainMenu2.Picture.convert('RGBA')
     MainMenu2.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu2.Picture), 255)
     MainMenu2.PictureSize = [100, 100]
 
 
     MainMenu2.ApplyMask = True
-    MainMenu2.PictureOffset = [700, 0]
+    MainMenu2.PictureOffset = [700, 300]
     MainMenu2.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp"))
 
     
@@ -165,14 +347,15 @@ def SettingsMenuBuild():
 
     #Paint.net er retarded.
     MainMenu3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp")
-    MainMenu3.Picture = MainMenu3.Picture.convert('RGB')
+    MainMenu3.Picture = MainMenu3.Picture.convert('RGBA')
     MainMenu3.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu3.Picture), 120)
-
+    
     MainMenu3.PictureOffset = [0, 200]
     MainMenu3.ApplyAlpha = True
     MainMenu3.Picture = AlphaBlending.PutAlpha(MainMenu3.Picture, 120)
 
-
+    #MainMenu3.ApplyCLUT = True
+    #MainMenu3.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
     MainMenuEnd = Scene_Descriptor.Empty
 
 
@@ -182,49 +365,11 @@ def SettingsMenuBuild():
     #Create a linked list
     MainMenu3.Next = MainMenu2
     MainMenu2.Next = MainMenu1
-    MainMenu1.Next = MainMenuBG
-    MainMenuBG.Next = MainMenuEnd
+    MainMenu1.Next = MainMenuEnd
+    #MainMenuBG.Next = MainMenuEnd
     MainMenuEnd.Next = None
 
-    return MainMenu
-
-    #while structure.Next != None:
-    #Render the operations
-    #Go to next item in linked list
+    TestEntity.ScenesConstructed += 1
+    return MainMenu, MainMenuBG, MainMenu1, MainMenu2, MainMenu3
 
 
-
-        
-
-
-#Construct Subsettings Menu
-def SubSettingsMenuBuild():
-    #if ((SubSettingsMenu.Exists) != 1):
-        SubSettingsMenu = Scene_Descriptor.SceneDescriptor(3, 2, ScreenResolutionX, ScreenResolutionY, False, False)
-        SubSettingsMenu.Exists = 1
-
-        SubSettingsMenu.Layer[0].Picture.Picture[0].PictureSize = [800, 600]
-        SubSettingsMenu.Layer[0].Picture.Picture[0].Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Overlegg.bmp")
-
-
-
-#Order some coffee
-def OrderCoffeeBuild():
-   # if ((OrderCoffee.Exists) != 1):
-
-        OrderCoffee = Scene_Descriptor.SceneDescriptor(2, 1, ScreenResolutionX, ScreenResolutionY, False, False)
-        OrderCoffee.Exists = 1
-
-        OrderCoffee.Layer[0].Picture.Picture[0].PictureSize = [800, 600]
-        OrderCoffee.Layer[0].Picture.Picture[0].Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp")
-
-        OrderCoffee.Layer[1].Picture.Picture[0].PictureSize = [400, 300]
-        OrderCoffee.Layer[1].Picture.Picture[0].Picture = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_Traktes_400_300.bmp")
-        OrderCoffee.Layer[1].Picture.Picture[0].PictureOffset = [0, 600]
-
-        OrderCoffee.SceneOperations.Mask = Image.Open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Masking Example.bmp")
-        OrderCoffee.SceneOperations.MaskApply = True
-        OrderCoffee.SceneOperations.Target[1][0] = True
-
-def PushItToTheLimitJPG():
-    return 0

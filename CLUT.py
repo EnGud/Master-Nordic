@@ -25,7 +25,7 @@ def GenerateTestCLUT(sizeR, sizeG, sizeB):
     return CLUT
 
 
-def ChangeCLUT(OldCLUT, NewCLUT):
+def ChangeCLUT(OldCLUT, NewCLUT, TestEntity):
         #replace OldCLUT with NewCLUT. OldCLUT and NewCLUT are 2D arrays that contain the CLUT values in R, G, B order.
         #OldCLUT and NewCLUT are of the same size.
         OutCLUT = [[[0 for b in range (len(NewCLUT[0][0]))] for g in range (len(NewCLUT[0]))] for r in range (len(NewCLUT))]
@@ -33,10 +33,11 @@ def ChangeCLUT(OldCLUT, NewCLUT):
         for i in range (len(OldCLUT)):
             for CurrentX in range (len(OldCLUT[i])):
                 OutCLUT[i][CurrentX] = NewCLUT[i][CurrentX]
+        TestEntity.ChangeCLUT += 1
         return OutCLUT
 
 #CurrentY er midlertidig til RAM er oppe
-def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, ScreenSizeX, TestEntity):
+def ApplyCLUT(Picture, CLUT, X_Offset, TestEntity):
     #Iterate through each pixel in Picture, use the value to find the position in the CLUT and set the pixel to the value in the CLUT.
     #Picture is a 2D array that contains the pixel values in R, G, B order.
     #CLUT is a 2D array that contains the CLUT values in R, G, B order.
@@ -46,11 +47,11 @@ def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, ScreenSizeX, TestEntity):
 
     #Get the RGB values from Picture
     #Create temp as [4][255] using numpy
-    Temp = np.zeros((ScreenSizeX, 4), dtype=np.uint8)
+    Temp = np.zeros((4), dtype=np.uint8)
 
 
     for CurrentX in range(len(Picture)):
-        if FreeLine[CurrentX+X_Offset]:
+        if TestEntity.FreeLine[CurrentX+X_Offset]:
             Temp[0], Temp[1], Temp[2] = Picture[CurrentX][0], Picture[CurrentX][1], Picture[CurrentX][2]
 
                 #[0, 0, 0, 0]
@@ -66,8 +67,16 @@ def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, ScreenSizeX, TestEntity):
             if (len(Picture[CurrentX]) == 4):
                 PictureOut[CurrentX+X_Offset][3] = Picture[CurrentX+X_Offset][3]
             
-            FreeLine[CurrentX + X_Offset] = False
+            if TestEntity.CurrentLayer != 0:
+                TestEntity.FreeLine[CurrentX + X_Offset] = False
+            TestEntity.CLUT_Pixel_Applied += 1
 
-    return PictureOut, FreeLine
+
+
+
+
+    TestEntity.CLUT_Applied += 1
+
+    return PictureOut
 
     

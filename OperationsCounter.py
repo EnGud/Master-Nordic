@@ -2,37 +2,63 @@
 
 #Length is the y-length of the screen.
 
+from operator import length_hint
+
+
 class OperationsCounter():
-    def __init__(self, Length):
+    def __init__(self, Length, Width):
+
+        FreeLine = [True]*Width
         self.Length = Length
+
+        self.CurrentLayer = 0
+
+        self.ScenesConstructed = 0
+        self.TimeTaken =[0]*Length
         #Alpha
-        self.CurrTime = [0]*Length
         #Redundant v
-        self.CheckAlpha = [0]*Length
 
-        self.ApplyAlphaInit = 0*Length
+        #Alpha
+        self.AlphaPassed = 0
+        
+        self.ApplyAlpha_Pixel = 0
+        self.ApplyAlpha_Pixel_Array = [0]*Length
+        self.ApplyAlphaR = 0
+        self.ApplyAlphaG = 0
+        self.ApplyAlphaB = 0
 
-        self.ApplyAlpha = 0*Length
-        #self.ApplyAlphaWithGammaCorrection = 0*Length
-        self.AlphaPassed = 0*Length
-            
-        self.ApplyAlphaR = 0*Length
-        self.ApplyAlphaG = 0*Length
-        self.ApplyAlphaB = 0*Length
-            
-        self.ApplyAlphaOperation = 0*Length
+        self.AlphaBlend = 0
 
-        self.ApplyMask = 0*Length
-        self.NoMask = 0*Length
+        #Mask
+        self.NoMask = 0
+        self.ApplyMask = 0
+        self.ApplyMask_Pixel_Array = [0]*Length
 
-        self.ModifyCLUT = 0*Length
-        self.ApplyCLUT = 0*Length
+        #CLUT
+        self.ChangeCLUT = 0
+        self.CLUT_Applied = 0
+        self.CLUT_Pixel_Applied = 0
+        self.CLUT_Pixel_Array = [0]*Length
+        self.CLUT_Pixel_Skipped = 0
 
-        self.RAM_get = 0*Length
-        self.RAM_put = 0*Length
-        self.RAM_clear = 0*Length
-        self.RAM_get_error = 0*Length
-        self.RAM_get_DataFound = 0*Length
-        self.RAM_get_DataNotFound = 0*Length
-        self.RAM_get_get = 0*Length
-        self.RAM_check = 0*Length
+        #RAM
+        self.RAM_put_call = 0
+        self.RAM_put = 0
+        self.RAM_put_Array = [0]*Length
+        
+        self.RAM_get_call = 0
+        self.RAM_get = 0
+        self.RAM_get_Array = [0]*Length
+
+        self.RAM_get_DataNotFound = 0
+        self.RAM_get_error = 0
+        self.RAM_clear = 0
+        self.RAM_Used_Cumulative = 0
+        self.RAM_Used_Bits_Cumulative = 0
+
+        self.RAM_Used = 0
+        self.RAM_Used_Array = [0]*Length
+        self.RAM_Used_Bits = 0
+        self.RAM_Used_Bits_Array = [0]*Length
+
+        #self.list = 
