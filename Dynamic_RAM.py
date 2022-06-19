@@ -5,17 +5,16 @@ from numpy import true_divide
 import Scene_Descriptor
 
 class RAM:
-    def __init__(self, Size, TestEntity):
+    def __init__(self, Size, TestEntityIn):
         self.Size = Size
         self.data = [None] * Size
         self.dataoccupied = [False] * Size
-        self.TestEntity = TestEntity
+        self.RAMTestEntity = TestEntityIn
 
 
 # it will contain a function to put data into the ram, and return the adress of the data such that the same data can be collected later given the adress.
     def put(self, data, TestEntity):
-        TestEntity.RAM_put += 1
-
+        TestEntity.RAM_put_call += 1
 
         #loop through dataoccupied to see if there is space left in the ram. If there is, put the data in the ram.
         for i in range(len(self.dataoccupied)):
@@ -32,7 +31,7 @@ class RAM:
 
 # it will contain a function to get data from ram by a given adress.
     def get(self, adress, TestEntity):
-        TestEntity.RAM_get += 1
+        TestEntity.RAM_get_call += 1
 
         #check if the adress is in the ram
         #If not in RAM
@@ -43,7 +42,7 @@ class RAM:
 
         #If in RAM
         elif self.data[adress] != None and self.dataoccupied[adress] == True:
-            TestEntity.RAM_get_DataFound += 1
+            TestEntity.RAM_get += 1
             return self.data[adress]
 
 
@@ -69,7 +68,7 @@ class RAM:
             if self.dataoccupied[i] == True:
                 count += 1
         print("There are", count, "data in the RAM")
-        TestEntity.RAM_check += 1
+        #TestEntity.RAM_check += 1
         return count
 
 

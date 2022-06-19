@@ -73,7 +73,7 @@ def ApplyAlpha (Foreground, X_Offset, Operator, Background, FreeLine, TestEntity
     #The input Foreground is a picture of x length with a x offset relative to background. Background is a picture of another length.
     #The output is a picture of the same length as the background, but with the foreground applied.
     if (Operator == ("Over" or "over")):
-        
+        PictureOut = np.zeros((len(Background), 4), dtype=np.uint8)
         for CurrentX in range(len(Foreground)):
             
 

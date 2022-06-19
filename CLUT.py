@@ -1,6 +1,7 @@
 #Class for color lookup table with R, G and B channels
 import numpy as np
 
+
 def GenerateCLUT(sizeR, sizeG, sizeB):
         #Generate a color lookup table for R, G and B channels with each channel having a size of sizeR, sizeG and sizeB. Start at 0 and end at sizeR-1, sizeG-1 and sizeB-1. The array is 2D.
     CLUTR = np.zeros((1, sizeR), dtype=np.uint8)
@@ -35,7 +36,7 @@ def ChangeCLUT(OldCLUT, NewCLUT):
         return OutCLUT
 
 #CurrentY er midlertidig til RAM er oppe
-def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, TestEntity):
+def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, ScreenSizeX, TestEntity):
     #Iterate through each pixel in Picture, use the value to find the position in the CLUT and set the pixel to the value in the CLUT.
     #Picture is a 2D array that contains the pixel values in R, G, B order.
     #CLUT is a 2D array that contains the CLUT values in R, G, B order.
@@ -45,7 +46,7 @@ def ApplyCLUT(Picture, CLUT, X_Offset, FreeLine, TestEntity):
 
     #Get the RGB values from Picture
     #Create temp as [4][255] using numpy
-    Temp = np.zeros((4), dtype=np.uint8)
+    Temp = np.zeros((ScreenSizeX, 4), dtype=np.uint8)
 
 
     for CurrentX in range(len(Picture)):

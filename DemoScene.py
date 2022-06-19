@@ -1,4 +1,4 @@
-from asyncio.base_futures import _FINISHED
+
 import Scene_Descriptor
 import AlphaBlending
 import AlphaMasking
@@ -26,8 +26,8 @@ else:
     ScreenResolutionX = 800
     ScreenResolutionY = 600 """
 
-ScreenResolutionX = 800
-ScreenResolutionY = 600
+ScreenResolutionX = MenusConstructor.ScreenResolutionX
+ScreenResolutionY = MenusConstructor.ScreenResolutionY
 
 #Setup
 TestEntity = OperationsCounter.OperationsCounter(ScreenResolutionY)
@@ -36,7 +36,7 @@ OutputBuffer = np.zeros((ScreenResolutionX, 4), dtype=np.uint8)
 OutputBufferLarge = np.zeros((ScreenResolutionY, ScreenResolutionX, 4), dtype=np.uint8)
 
 RAM=Dynamic_RAM.RAM(32, TestEntity)
-
+TestWithTime = True
 #Use Scene_Descriptor to build the scene through a function
 
 
@@ -48,8 +48,8 @@ def Render(Items, CurrentY, RAM):
     DrawnCurrentLine = False
 
     #VI STARTER MED EN TOM X-ARRAY MED STØRRELSE SKJERMEN
-    PictureOut = np.zeros((800, 4), dtype=np.uint8)
-
+    PictureOut = np.zeros((ScreenResolutionX, 4), dtype=np.uint8)
+    #PictureOutAdress = Dynamic_RAM.put(PictureOut, TestEntity)
     #Traverse linked list
     CurrentItem = Items[len(Items)-1]
     while CurrentItem.Next != None:
@@ -62,7 +62,7 @@ def Render(Items, CurrentY, RAM):
         #RAM.CheckEveryArrayBit(TestEntity)
 
 
-        
+
         
         #
 
@@ -76,7 +76,7 @@ def Render(Items, CurrentY, RAM):
                 #Utfør CLUT
                 #ApplyCLUT(Picture, CLUT, FreeLine, TestEntity):
                 #RAM.get(PictureAdress, TestEntity)
-                PictureOut, FreeLine = CLUT.ApplyCLUT(Structure.Picture[CurrentY-Structure.PictureOffset[1]], Structure.CLUT, Structure.PictureOffset[0], FreeLine, TestEntity)
+                PictureOut, FreeLine = CLUT.ApplyCLUT(Structure.Picture[CurrentY-Structure.PictureOffset[1]], Structure.CLUT, Structure.PictureOffset[0], FreeLine, ScreenResolutionX, TestEntity)
                 #RAM.put(Picture, TestEntity)
 
             if(Structure.ApplyMask):
@@ -106,12 +106,16 @@ def Render(Items, CurrentY, RAM):
                 PictureOut[x] = Items[1].Picture[CurrentY][x]
 
 
+        #Remove when testing with time.
+
+
         RAM.clear(CurrentItem.Picture_RAM_Adress, TestEntity)
-        #RAM.check(TestEntity)
-        #RAM.CheckEveryArrayBit(TestEntity)
-        #FreeLine = FreeLine and PictureOut
+
         CurrentItem = CurrentItem.Next
 
+    if TestWithTime == False:
+        TestEntity.RAM_Used[CurrentY] = RAM.check(TestEntity)
+        TestEntity.RAM_Used_Bits[CurrentY] = RAM.CheckEveryArrayBit(TestEntity)
     
     return PictureOut
 
@@ -124,18 +128,33 @@ while(1):
     #Use a state machine to control the flow of the program. Start with MainMenu, let it iterate for 3 cycles, then go to SettingsMenu. Let it run for two cycles then go to SubSettingsMenu. Let it run for two cycles then go to OrderCoffee. Let it run for three cycles then go to MainMenu. Try to implement threading on Render()
     if (StateMachineStatus == "Main"):
         #MainMenu Build bygges ikke realtime! Bytt ut med å lagre en kopi av MainMenu i RAM eller noe.
-        MainMenu = MenusConstructor.MainMenuBuild()
+        MainMenu = MenusConstructor.MainMenuBuild(TestEntity)
         #Render MainMeny for the length of ScreenResolutionY
         #Start timing
+        TestWithTime = True
         StartTime = time.time()
         for CurrentY in range(ScreenResolutionY):
+            TestEntity.CurrentY = [CurrentY]
+
+            #MainLoop for render
+            StartTime = time.time()
             OutputBuffer = Render(MainMenu, CurrentY, RAM)
+            EndTime = time.time()
+            #End MainLoop
+
+            TestEntity.TimeTaken[CurrentY] = EndTime - StartTime
             #OutputBufferLarge is only used to visualize the picture. NOT FOR THE ACTUAL MEASUREMENTS OF LINE TIMINGS!
             OutputBufferLarge[CurrentY] = OutputBuffer
-            print(CurrentY)
+            
             #Lagre større buffer, kun for visualisering/verifisering.
+
         #Stop timing
-        EndTime = time.time()
+        
+        #Calculate time taken
+        
+    #Print TestEntity into Histogram
+
+        Analytics.histogram_alt(TestEntity.TimeTaken)
 
 
         #draw OutputBufferLarge to screen

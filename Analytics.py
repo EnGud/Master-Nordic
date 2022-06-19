@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 
-from AlphaBlending import ApplyAlpha
 
 
 
@@ -14,6 +13,17 @@ def histogram(input_structure):
             PlotHistogram(Histogram)
         return Histogram
 
+#Alternative version
+#Input is a class which contain multiple attributes which are arrays. Create a histogram for each attribute, iterating over the arrays.
+def histogram_alt(input_structure):
+        #create a histogram for each attribute
+        Histogram = [0]*600
+        for i in range(len(input_structure)):
+            #create a histogram for each attribute
+            Histogram[i] = input_structure[i]
+            
+        PlotHistogram(Histogram)
+        return Histogram
 
 
 """ 
