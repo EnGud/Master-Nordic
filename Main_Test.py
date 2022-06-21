@@ -8,7 +8,7 @@ import Analytics
 #Limitation: Every picture needs an alpha
 
 
-TestEntity = OperationsCounter.OperationsCounter(600)
+TestEntity = OperationsCounter.OperationsCounter(600, 800)
 TestEntity.Length = 600 
 # Manual fix
 #Bærbar
@@ -19,9 +19,9 @@ TestEntity.Length = 600
 #BufferedMask = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Graas.bmp")
 
 #Stasjonær
-BufferedPicture1 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp"))
-BufferedPicture2 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Overlegg.bmp"))
-BufferedPicture3 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Alternativ.bmp"))
+BufferedPicture1 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp").convert("RGBA"))
+BufferedPicture2 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SettingsBackground.bmp").convert("RGBA"))
+BufferedPicture3 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SubSettingsBackground.bmp").convert("RGBA"))
 #BUFFER EQUALS SAVED ON FLASH/DISK/WHATEVER
 
 
@@ -31,7 +31,7 @@ BufferedPicture3 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nor
 BufferedMask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Graas.bmp"))
 BufferedMask1 = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Stjerne.bmp")
 
-FreeLine = [True]*800
+TestEntity.FreeLine = [True]*800
 
 Histogram = [0]*600
 
@@ -49,7 +49,7 @@ if AlphaTest == True:
         #
         print(CurrentY)
         
-        AlphaedPictureOut[CurrentY], FreeLine = AlphaBlending.ApplyAlpha(Picture, 0, "Over", PictureBG, FreeLine, TestEntity)
+        AlphaedPictureOut[CurrentY] = AlphaBlending.ApplyAlpha(Picture, 0, "Over", PictureBG, TestEntity)
         #Histogram[i] = TestEntity.ApplyAlpha
         #TestEntity.ApplyAlpha = 0
 
@@ -64,6 +64,7 @@ if AlphaTest == True:
     AlphaedPictureOut.show()
 
 
+
 MaskTest = False
 if MaskTest == True:
     MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
@@ -74,7 +75,7 @@ if MaskTest == True:
         LineBuff2 = BufferedPicture2[CurrentY]
 
         print(CurrentY)
-        MaskedPicture[CurrentY] = AlphaMasking.ApplyMask(LineBuff1, LineBuff2, LineMask, FreeLine, TestEntity)
+        MaskedPicture[CurrentY] = AlphaMasking.ApplyMask(LineBuff1, 0, LineBuff2, LineMask, TestEntity)
         #Histogram[i] = TestEntity.ApplyMask
         #TestEntity.ApplyMask = 0
     
@@ -84,8 +85,11 @@ if MaskTest == True:
     Analytics.PlotHistogram(Histogram)
     MaskedPicture.show()
 
-    #CLUT stands for Color Look Up Table
-CLUTTest = True
+
+
+#CLUT stands for Color Look Up Table
+
+CLUTTest = False
 if CLUTTest == True:
     TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
 
@@ -95,8 +99,91 @@ if CLUTTest == True:
     #apply a CLUT on a picture by changing the colour value to the corresponding color value of the CLUT
     for CurrentY in range (len(BufferedPicture1)):
         print(CurrentY)
-        CLUTedPicture[CurrentY] = CLUT.ApplyCLUT(BufferedPicture1[CurrentY], TestCLUT, FreeLine, TestEntity)
+        CLUTedPicture[CurrentY] = CLUT.ApplyCLUT(BufferedPicture1[CurrentY], TestCLUT, 0, TestEntity)
 
     CLUTedPicture = np.asarray(CLUTedPicture)
     CLUTedPicture = Image.fromarray(CLUTedPicture)
     CLUTedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_CLUT.bmp")
+
+
+
+Both = False
+if Both == True:
+    AlphaedPictureOut = np.zeros((600, 800, 4), dtype=np.uint8)
+    MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
+    AlphaedPicture = AlphaBlending.check_alpha(BufferedPicture1, TestEntity)
+    input()
+
+    for CurrentY in range (len(BufferedPicture1)):
+        
+        Picture = AlphaedPicture[CurrentY]
+        PictureBG = BufferedPicture2[CurrentY]
+        #
+        print(CurrentY)
+        
+        AlphaedPictureOut[CurrentY] = AlphaBlending.ApplyAlpha(Picture, 0, "Over", PictureBG, TestEntity)
+        #Histogram[i] = TestEntity.ApplyAlpha
+        #TestEntity.ApplyAlpha = 0
+  
+
+    for CurrentY in range (len(BufferedPicture1)):
+        LineMask = BufferedMask[CurrentY]
+        LineBuff1 = BufferedPicture3[CurrentY]
+        LineBuff2 = AlphaedPictureOut[CurrentY]
+
+        print(CurrentY)
+        MaskedPicture[CurrentY] = AlphaMasking.ApplyMask(LineBuff1, 0, LineBuff2, LineMask, TestEntity)
+        #Histogram[i] = TestEntity.ApplyMask
+        #TestEntity.ApplyMask = 0
+    
+    MaskedPicture = np.asarray(MaskedPicture)
+    MaskedPicture = Image.fromarray(MaskedPicture)
+    MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking_And_Alpha.bmp")
+    Analytics.PlotHistogram(Histogram)
+    MaskedPicture.show()
+
+
+All = True
+if All == True:
+
+    TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+    CLUTedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
+
+
+    #apply a CLUT on a picture by changing the colour value to the corresponding color value of the CLUT
+    for CurrentY in range (len(BufferedPicture1)):
+        print(CurrentY)
+        CLUTedPicture[CurrentY] = CLUT.ApplyCLUT(BufferedPicture1[CurrentY], TestCLUT, 0, TestEntity)
+
+    AlphaedPictureOut = np.zeros((600, 800, 4), dtype=np.uint8)
+    MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
+    AlphaedPicture = AlphaBlending.check_alpha(CLUTedPicture, TestEntity)
+    input()
+
+    for CurrentY in range (len(BufferedPicture1)):
+        
+        Picture = AlphaedPicture[CurrentY]
+        PictureBG = BufferedPicture2[CurrentY]
+        #
+        print(CurrentY)
+        
+        AlphaedPictureOut[CurrentY] = AlphaBlending.ApplyAlpha(Picture, 0, "Over", PictureBG, TestEntity)
+        #Histogram[i] = TestEntity.ApplyAlpha
+        #TestEntity.ApplyAlpha = 0
+  
+
+    for CurrentY in range (len(BufferedPicture1)):
+        LineMask = BufferedMask[CurrentY]
+        LineBuff1 = BufferedPicture3[CurrentY]
+        LineBuff2 = AlphaedPictureOut[CurrentY]
+
+        print(CurrentY)
+        MaskedPicture[CurrentY] = AlphaMasking.ApplyMask(LineBuff1, 0, LineBuff2, LineMask, TestEntity)
+        #Histogram[i] = TestEntity.ApplyMask
+        #TestEntity.ApplyMask = 0
+    
+    MaskedPicture = np.asarray(MaskedPicture)
+    MaskedPicture = Image.fromarray(MaskedPicture)
+    MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking_And_Alpha_And_CLUT.bmp")
+    Analytics.PlotHistogram(Histogram)
+    MaskedPicture.show()
