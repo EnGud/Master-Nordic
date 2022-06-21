@@ -1,6 +1,7 @@
 #This code will simulate a dynamic RAM module with a set size as init input argument.
 #It will increment an attribute of the input class "TestEntity" every time each function is called.
 import ctypes
+
 from numpy import true_divide
 import Scene_Descriptor
 
@@ -93,15 +94,20 @@ class RAM:
     def CheckEveryArrayBit(self, TestEntity):
         DataSize = 0
         DataArray = 0
-        DataBits = 0
+        #DataBits = 0
         for i in range(len(self.data)):
             if (self.dataoccupied[i]):
-                DataArray += len(self.data[i])
-                for j in range(len(self.data[i])):
-                    DataBits += len(self.data[i][j])
-                DataSize = (DataArray * DataBits)
+                X = len(self.data[i]) - 1
+                Z = len(self.data[i][X])
+
+                DataArray =  X * Z
+            else:
+                break
+                
+            TestEntity.RAM_Used_Bytes +=  DataArray
+
         #print("There are", DataSize, "databits in the RAM")
-        return DataSize
+        return
 
 
 
@@ -115,3 +121,20 @@ class RAM:
         else:
             Structure.PictureStoredInRam = False
 
+""" 
+    def CheckEveryArrayBit(self, TestEntity):
+        DataSize = 0
+        DataArray = 0
+        DataBits = 0
+        for i in range(len(self.data)):
+            if (self.dataoccupied[i]):
+                DataArray += len(self.data[i])
+                for j in range(len(self.data[i])):
+                    DataBits += len(self.data[i][j])
+                    for k in range (len(self.Data[i][j])):
+                        DataSize
+                DataSize = (DataArray * DataBits)
+        #print("There are", DataSize, "databits in the RAM")
+        return DataSize
+
+ """
