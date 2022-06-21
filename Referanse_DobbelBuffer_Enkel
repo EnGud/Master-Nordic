@@ -1,0 +1,215 @@
+import Scene_Descriptor
+import AlphaBlending
+import AlphaMasking
+import OperationsCounter
+import Dynamic_RAM
+import CLUT
+from PIL import Image
+import Analytics
+import numpy as np
+import threading
+import MenusConstructor
+import Referanse_Funksjoner
+
+import time
+
+class PictureList:
+    def __init__(Self, Layers):
+        Self.list = [0]*Layers
+
+class Picture:
+    def __init__(Self, layer, ResolutionX, ResolutionY):
+        Self.Exists = 1
+        Self.Size = [ResolutionX, ResolutionY]
+        Self.Layer = layer
+        Self.Picture = [[]]
+        Self.Offset = [0, 0]
+        Self.ApplyCLUT = False
+        Self.CLUT = np.zeros((3, 256), dtype=np.uint8)
+        Self.ApplyMask = False
+        Self.Mask = [[]]
+        Self.ApplyAlpha = False
+
+
+ScreenResolutionX = 800
+ScreenResolutionY = 600
+
+#Draw whole picture to buffer
+#Move to next picture
+#Draw the next picture at offset into whole buffer
+#Next picture, same
+#Push buffer
+#Switch buffer
+TargetBuffer = False
+PictureOut = np.zeros((ScreenResolutionY, ScreenResolutionX, 4), dtype=np.uint8)
+StateMachineStatus = "Test"
+
+Test0 = Picture(0, ScreenResolutionX, ScreenResolutionY)
+Test1 = Picture(1, 200, 100)
+Test2 = Picture(2, 100, 100)
+Test3 = Picture(3, 300, 100)
+
+Test0.Picture = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp").convert("RGBA"))
+Test1.Picture = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp").convert("RGBA"))
+Test2.Picture = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp").convert("RGBA"))
+Test3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp").convert("RGBA")
+Test3.Picture.putalpha(128)
+Test3.Picture = np.asarray(Test3.Picture)
+
+
+
+
+Test1.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp"))
+Test2.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp"))
+
+Test1.Offset = [600, 0]
+Test2.Offset = [700, 300]
+Test3.Offset = [0, 200]
+
+
+FreeLine=np.full((ScreenResolutionY, ScreenResolutionX), True)
+
+def Render(Structure):
+    #Draw layer 1 picture
+    for i in range (len(Structure)):
+        if Structure[i].ApplyCLUT == True:
+            PictureBuff = Referanse_Funksjoner.Ref_Alpha(Structure.list[i].Picture, Structure.list[i].Offset, PictureOut)
+
+        if Structure[i].ApplyMask == True:
+            PictureBuff = Image.composite(Structure.list[i].Picture, Structure.list[i].Picture, Structure.list[i].Mask)
+
+        if Structure[i].ApplyAlpha == True:
+            PictureBuff = Image.alpha_composite(Structure.list[i-1].Picture, Structure.list[i].Picture)
+
+        PictureBuff.paste()
+    
+        return PictureOut
+
+while(1):
+    
+    """ if StateMachineStatus == "MainMenu":
+        Structure = BuildMainMenu()
+        PictureOut = Render(Structure) """
+    
+    if StateMachineStatus == "Test":
+
+        
+        #foreground = foreground.resize(background.size)
+        StartTime = time.time()
+        Out, FreeLine = Referanse_Funksjoner.Ref_Alpha(Test3, Test3.Offset, Test0, FreeLine)
+        #Test = Image.fromarray(Out)
+        #Test.show()
+        Out1, FreeLine = Referanse_Funksjoner.Ref_Mask(Test1.Picture, Test1.Offset, Out, Test1.Mask, FreeLine)
+        Out2, FreeLine = Referanse_Funksjoner.Ref_Mask(Test2.Picture, Test2.Offset, Out1, Test2.Mask, FreeLine)
+        EndTime = time.time()
+
+        print (EndTime - StartTime)
+        Out2 = Image.fromarray(Out2)
+        Out2.show()
+
+
+        break
+    
+
+    
+    if TargetBuffer == True:
+        Buffer0 = PictureOut
+    if TargetBuffer == False:
+        Buffer1 = PictureOut
+    TargetBuffer != TargetBuffer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def BuildMainMenu():
+
+        #Todo: Error if picture is larger than screen for every layer/picture.
+    
+    MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
+
+    MainMenuBG.Exists = 1    
+    #MainMenu1.Layer = 0
+    
+
+    #set background to screen resolution
+    #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
+    #MainMenuBG.Picture = AlphaBlending.PutAlpha(np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield.bmp")), 120)
+    #MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield_1280_900.bmp")
+    MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp")
+    MainMenuBG.Picture = np.asarray(MainMenuBG.Picture.convert('RGBA'))
+    MainMenuBG.PictureSize = [ScreenResolutionX, ScreenResolutionY]
+    MainMenuBG.ApplyCLUT = False
+    MainMenuBG.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+    #MainMenuBG.DrawOverBG = False
+
+    if ((MainMenuBG.PictureSize[1] <= ScreenResolutionY) and (MainMenuBG.PictureSize[0]) <= ScreenResolutionX):
+        pass
+    else:
+        print("Error! Picture is not the same size as the screen resolution. The background needs to fit the screen.")
+        exit()
+    
+
+    MainMenu1 = Scene_Descriptor.SceneDescriptor(1, 200, 100)
+    MainMenu1.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
+    MainMenu1.Picture = MainMenu1.Picture.convert('RGBA')
+    MainMenu1.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu1.Picture), 200)
+    MainMenu1.PictureSize = [200, 100]
+    MainMenu1.PictureOffset = [600, 0]
+    MainMenu1.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+
+
+    #MainMenu1.ApplyCLUT = True
+    MainMenu1.ApplyMask = True
+    MainMenu1.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp"))
+    
+
+
+    MainMenu2 = Scene_Descriptor.SceneDescriptor(2, 100, 100)
+    MainMenu2.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp")
+    MainMenu2.Picture = MainMenu2.Picture.convert('RGBA')
+    MainMenu2.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu2.Picture), 255)
+    MainMenu2.PictureSize = [100, 100]
+
+
+    MainMenu2.ApplyMask = True
+    MainMenu2.PictureOffset = [700, 300]
+    MainMenu2.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp"))
+
+    
+
+    
+    MainMenu3 = Scene_Descriptor.SceneDescriptor(3, 300, 100)
+    MainMenu3.PictureSize = [300, 100]
+
+    #Paint.net er retarded.
+    MainMenu3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp")
+    MainMenu3.Picture = MainMenu3.Picture.convert('RGBA')
+    MainMenu3.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu3.Picture), 120)
+    
+    MainMenu3.PictureOffset = [0, 200]
+    MainMenu3.ApplyAlpha = True
+    MainMenu3.Picture = AlphaBlending.PutAlpha(MainMenu3.Picture, 120)
+
+
+    PictureArray = [MainMenuBG, MainMenu1, MainMenu2, MainMenu3]
+    return PictureArray
