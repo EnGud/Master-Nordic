@@ -49,8 +49,6 @@ def Render(Items, CurrentY, RAM, TestEntity):
     #Start fra øverste lag, iterer nedover.
         
         RAM.StorePictureInRam(CurrentItem, CurrentY, RAM, TestEntity)
-        if CurrentY == 200:
-            pass
         #Sjekk om noen operasjoner skal utføres
         #om ja: Hent linjebuffer
         #utfør CLUT-operasjoner 
@@ -63,13 +61,13 @@ def Render(Items, CurrentY, RAM, TestEntity):
         #For hver freeline som ikke er berørt, tegn bakgrunnen
         #
         #Returner ut linja
-        if CurrentY == 200:
-            pass
+
         LineBuffer = RAM.get(LineBufferAdress, TestEntity)
         #Dersom nåværende lag er innenfor Y, gitt offset
         if ((CurrentY >= CurrentItem.PictureOffset[1]) and (CurrentY < CurrentItem.PictureOffset[1] + CurrentItem.PictureSize[1])):
                 
             
+
 
             if(CurrentItem.ApplyCLUT):
                     #put_specific(self, adress, data, TestEntity):
@@ -83,9 +81,10 @@ def Render(Items, CurrentY, RAM, TestEntity):
                             LineBuffer[x] = CLUTBuff[x]
 
 
+
                 
 
-            if(CurrentItem.ApplyMask):
+            if(CurrentItem.ApplyMask == True and CurrentItem.ApplyAlpha == False):
                     #ApplyMask(PictureFG, X_Offset, PictureBG, Mask, TestEntity):
 
                     MaskBuff = AlphaMasking.ApplyMask(RAM.get(CurrentItem.Picture_RAM_Adress, TestEntity), CurrentItem.PictureOffset[0], Items[1].Picture[CurrentY], CurrentItem.Mask[CurrentY-CurrentItem.PictureOffset[1]], TestEntity)
@@ -174,7 +173,7 @@ while(1):
         #Render MainMeny for the length of ScreenResolutionY
         #Start timing
         TestWithTime = True
-        StartTime = time.time()
+        MuskTime = time.time()
         for CurrentY in range(ScreenResolutionY):
             TestEntity.CurrentY = [CurrentY]
 
@@ -189,16 +188,27 @@ while(1):
             #OutputBufferLarge is only used to visualize the picture. NOT FOR THE ACTUAL MEASUREMENTS OF LINE TIMINGS!
             OutputBufferLarge[CurrentY] = OutputBuffer
             
+
+            #print(TestEntity.NoMask)
+            Analytics.Testing(TestEntity, CurrentY)
+
+            Analytics.Clean(TestEntity)
             #Lagre større buffer, kun for visualisering/verifisering.
+        MoskTime = time.time()
+        FullTime = MoskTime - MuskTime
+        print(FullTime)
+
 
         #Stop timing
         
         #Calculate time taken
+
         
-    #Print TestEntity into Histogram
+        
+        #Print TestEntity into Histogram
 
         Analytics.histogram(TestEntity.TimeTaken)
-
+        #Analytics.Analyze(TestEntity)
 
         #draw OutputBufferLarge to screen
 
@@ -216,6 +226,7 @@ while(1):
             #Hmm
 
 
+
     if (StateMachineStatus == "SettingsMenu"):
         Analytics.Clean(TestEntity)
         #MainMenu Build bygges ikke realtime! Bytt ut med å lagre en kopi av MainMenu i RAM eller noe.
@@ -223,7 +234,6 @@ while(1):
         #Render MainMeny for the length of ScreenResolutionY
         #Start timing
         TestWithTime = True
-        StartTime = time.time()
         for CurrentY in range(ScreenResolutionY):
             TestEntity.CurrentY = [CurrentY]
 
@@ -280,7 +290,6 @@ while(1):
         #Render MainMeny for the length of ScreenResolutionY
         #Start timing
         TestWithTime = True
-        StartTime = time.time()
         for CurrentY in range(ScreenResolutionY):
             TestEntity.CurrentY = [CurrentY]
 

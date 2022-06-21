@@ -44,5 +44,3 @@ def CheckNumbersOfChannels(Picture):
         return 3
     else:
         print("No. Just no.")
-
-

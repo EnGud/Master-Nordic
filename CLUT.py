@@ -47,23 +47,22 @@ def ApplyCLUT(Picture, CLUT, X_Offset, TestEntity):
 
     #Get the RGB values from Picture
     #Create temp as [4][255] using numpy
-    Temp = np.zeros((4), dtype=np.uint8)
+    #Temp = np.zeros((4), dtype=np.uint8)
 
 
     for CurrentX in range(len(Picture)):
         if TestEntity.FreeLine[CurrentX+X_Offset]:
-            Temp[0], Temp[1], Temp[2] = Picture[CurrentX][0], Picture[CurrentX][1], Picture[CurrentX][2]
 
                 #[0, 0, 0, 0]
                 #Use the RGB values to find the position in the CLUT. R, G, B
 
-            Temp[0], Temp[1], Temp[2] = CLUT[0][Temp[0]], CLUT[1][Temp[1]], CLUT[2][Temp[2]]
+            #Temp[0], Temp[1], Temp[2] = CLUT[0][Picture[CurrentX][0]], CLUT[1][Picture[CurrentX][1]], CLUT[2][Picture[CurrentX][2]]
 
 
 
                 #Set the pixel to the value in the CLUT
                 
-            PictureOut[CurrentX+X_Offset][0], PictureOut[CurrentX+X_Offset][1], PictureOut[CurrentX+X_Offset][2] = Temp[0], Temp[1], Temp[2]
+            PictureOut[CurrentX+X_Offset][0], PictureOut[CurrentX+X_Offset][1], PictureOut[CurrentX+X_Offset][2] = CLUT[0][Picture[CurrentX][0]], CLUT[1][Picture[CurrentX][1]], CLUT[2][Picture[CurrentX][2]]
             if (len(Picture[CurrentX]) == 4):
                 PictureOut[CurrentX+X_Offset][3] = Picture[CurrentX+X_Offset][3]
             

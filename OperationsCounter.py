@@ -61,4 +61,14 @@ class OperationsCounter():
         self.RAM_Used_Bits = 0
         self.RAM_Used_Bits_Array = [0]*Length
 
-        #self.list = 
+        #self.list =
+
+    """  @property
+    def NoMask(self):
+        return self._NoMask
+    @NoMask.setter
+    def NoMask(self, value):
+        self._NoMask = value
+        print("value: ")
+        print(self._NoMask) """
+    

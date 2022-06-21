@@ -1,7 +1,7 @@
 #Alpha Compositing
 
 import numpy as np
-
+import time
 #Alpha Compositing is the process of combining two images with a transparency mask
 PictureOut = np.zeros((800, 4), dtype=np.uint8)
 
@@ -74,41 +74,42 @@ def ApplyAlpha (Foreground, X_Offset, Operator, Background, TestEntity):
     #The output is a picture of the same length as the background, but with the foreground applied.
     if (Operator == ("Over" or "over")):
         PictureOut = np.zeros((len(Background), 4), dtype=np.uint8)
+        #StartTime = time.time()
+        Alpha = Foreground[0][3]
+        AlphaOut = Alpha
+        Alpha = Alpha/255
         for CurrentX in range(len(Foreground)):
             
 
             #If the current pixel is free
             if TestEntity.FreeLine[CurrentX + X_Offset] == True:
 
-                if Foreground[CurrentX][3] == 0:
-                    PictureOut[CurrentX + X_Offset] = Foreground[CurrentX]
-                    TestEntity.AlphaPassed += 1
+                #if Foreground[CurrentX][3] == 0:
+                #    PictureOut[CurrentX + X_Offset] = Foreground[CurrentX]
+                #    TestEntity.AlphaPassed += 1
 
-                else:
+                #else:
                             
                         #map the foreground alpha value to a range of 0 to 1. This is done to avoid floating point errors.
                         #wtf skjer her? bugga bajs
-                    Alpha = np.asarray(Foreground[CurrentX][3])
-                    AlphaOut = Alpha
-                    Alpha = Alpha/255
+                    
                     
                         
                     TestEntity.ApplyAlpha_Pixel += 1
-                        
-                    Red = AlphaFormula(Foreground[CurrentX][0], Background[CurrentX+X_Offset][0], Alpha)
+                    #Fg*Alpha + Bg*(1-Alpha)                            
+                    PictureOut[CurrentX+X_Offset][0] = Foreground[CurrentX][0]*Alpha + Background[CurrentX+X_Offset][0]*(1-Alpha)
                     TestEntity.ApplyAlphaR += 1
-                    Green = AlphaFormula(Foreground[CurrentX][1], Background[CurrentX+X_Offset][1], Alpha)
+                    PictureOut[CurrentX+X_Offset][1] = Foreground[CurrentX][1]*Alpha + Background[CurrentX+X_Offset][1]*(1-Alpha)
                     TestEntity.ApplyAlphaG += 1
-                    Blue = AlphaFormula(Foreground[CurrentX][2], Background[CurrentX+X_Offset][2], Alpha)
+                    PictureOut[CurrentX+X_Offset][2] = Foreground[CurrentX][2]*Alpha + Background[CurrentX+X_Offset][2]*(1-Alpha)
                     TestEntity.ApplyAlphaB += 1
                         #Combine Red, Green and Blue into PictureOut
-                    PictureOut[CurrentX+X_Offset][0] = Red
-                    PictureOut[CurrentX+X_Offset][1] = Green
-                    PictureOut[CurrentX+X_Offset][2] = Blue
                     PictureOut[CurrentX+X_Offset][3] = AlphaOut
                         #PictureOut[CurrentX] = [Red, Green, Blue, AlphaOut]
-                if TestEntity.CurrentLayer != 0:
-                    TestEntity.FreeLine[CurrentX + X_Offset] = False
+                    if TestEntity.CurrentLayer != 0:
+                        TestEntity.FreeLine[CurrentX + X_Offset] = False
+        #EndTime = time.time()
+        #print(EndTime - StartTime)
         TestEntity.AlphaBlend += 1
     return PictureOut
 
