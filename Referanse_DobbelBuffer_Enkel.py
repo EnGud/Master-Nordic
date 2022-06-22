@@ -1,5 +1,3 @@
-from webbrowser import Opera
-import Scene_Descriptor
 import OperationsCounter
 import Dynamic_RAM
 import CLUT
@@ -10,6 +8,7 @@ import Referanse_Funksjoner
 
 import time
 
+#Simple scene descriptor lite, based on model scene descriptor
 class PictureList:
     def __init__(Self, Layers):
         Self.list = [0]*Layers
@@ -37,6 +36,8 @@ TargetBuffer = False
 TestEntity = OperationsCounter.OperationsCounter(ScreenResolutionX, ScreenResolutionY)
 StateMachineStatus = "MainMenu"
 RAM = Dynamic_RAM.RAM(16, TestEntity)
+
+#A lot of manual construction of scenes, using the scene descriptor.
 
 #Main Menu
 MainMenuBG = Picture(0, ScreenResolutionX, ScreenResolutionY)
@@ -111,23 +112,29 @@ while(1):
     if StateMachineStatus == "MainMenu":
         FreeLine=np.full((ScreenResolutionY, ScreenResolutionX), True)
         
-        #foreground = foreground.resize(background.size)
+        
         StartTime = time.time()
+        #Operation 1
         Out, FreeLine = Referanse_Funksjoner.Ref_Alpha(MainMenu3, MainMenu3.Offset, MainMenuBG, FreeLine, RAM, TestEntity)
-        #Test = Image.fromarray(Out)
-        #Test.show()
+        RAM.clear("All", TestEntity)
+        #Operation 2
         Out1, FreeLine = Referanse_Funksjoner.Ref_Mask(MainMenu1.Picture, MainMenu1.Offset, Out, MainMenu1.Mask, FreeLine, RAM, TestEntity)
         RAM.clear("All", TestEntity)
+        #Operation 3
         Out2, FreeLine = Referanse_Funksjoner.Ref_Mask(MainMenu2.Picture, MainMenu2.Offset, Out1, MainMenu2.Mask, FreeLine, RAM, TestEntity)
         RAM.clear("All", TestEntity)
+        #Operation 4
         Out3 = Referanse_Funksjoner.Ref_Fill(Out2, MainMenuBG.Picture, FreeLine, RAM, TestEntity)
         RAM.clear("All", TestEntity)
+
+        #Timing
         EndTime = time.time()
         TimeArray[0] = (EndTime - StartTime)
         #print the time
+        #Next state
         StateMachineStatus = "SettingsMenu"
 
-
+        #Show final output
         #Out3 = Image.fromarray(Out3)
         #Out3.show()
 
@@ -139,6 +146,9 @@ while(1):
         TargetBuffer != TargetBuffer
         
     
+
+    #Rest of scenes are much of the same.
+
     if StateMachineStatus == "SettingsMenu":
         FreeLine=np.full((ScreenResolutionY, ScreenResolutionX), True)
 
@@ -178,7 +188,7 @@ while(1):
         EndTime = time.time()
         TimeArray[2] = (EndTime - StartTime)
 
-
+        #Get time
         Analytics.histogram(TimeArray)
 
         Out3 = Image.fromarray(Out3)
@@ -187,19 +197,6 @@ while(1):
 
 
     
-
-#if StateMachineStatus == "SettingsMenu":
-
-
-
-
-
-#if StateMachineStatus == "SubSettingsMenu":
-
-
-
-
-
 
 
 

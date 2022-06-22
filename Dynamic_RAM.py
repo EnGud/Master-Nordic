@@ -1,10 +1,10 @@
 #This code will simulate a dynamic RAM module with a set size as init input argument.
 #It will increment an attribute of the input class "TestEntity" every time each function is called.
-import ctypes
+
 
 from numpy import true_divide
-import Scene_Descriptor
 
+#Initiate a RAM module
 class RAM:
     def __init__(self, Size, TestEntityIn):
         self.Size = Size
@@ -13,7 +13,7 @@ class RAM:
         self.RAMTestEntity = TestEntityIn
 
 
-# it will contain a function to put data into the ram, and return the adress of the data such that the same data can be collected later given the adress.
+# A function to put data into the RAM array, and return an andress
     def put(self, data, TestEntity):
         TestEntity.RAM_put_call += 1
 
@@ -28,7 +28,7 @@ class RAM:
         print("No space left in the RAM")
         return -1
 
-    #Put data in specific RAM adress
+    #Put data in specific RAM adress. Similar to regular put, but no scanning needed.
     def put_specific(self, adress, data, TestEntity):
         self.data[adress] = data
         self.dataoccupied[adress] = True
@@ -36,8 +36,7 @@ class RAM:
         return adress
 
 
-
-# it will contain a function to get data from ram by a given adress.
+    #Function to get the data at a given adress
     def get(self, adress, TestEntity):
         TestEntity.RAM_get_call += 1
 
@@ -60,7 +59,8 @@ class RAM:
             print("Fatal Error. Situation not covered by the code.")
             return -1
 
-#It will contain a function to clear out the data and dataoccupied arrays to make them empty in a given adress
+
+#Function to clear out the ram of either all data, or select data.
     def clear(self, adress, TestEntity):
         if adress == "All":
             for i in range(len(self.dataoccupied)):
@@ -78,8 +78,7 @@ class RAM:
             return True
 
 
-#it will contain a function to check how much of the ram is used
-#and how much is free.
+#Function to check how many "entities" are in the RAM
     def check(self, TestEntity):
         count = 0
         for i in range(len(self.dataoccupied)):
@@ -90,7 +89,7 @@ class RAM:
         return count
 
 
-    #A function that checks len() of every array position, and sums it up
+   #Function to find how many bytes are stored in RAM
     def CheckEveryArrayBit(self, TestEntity):
         DataSize = 0
         DataArray = 0
@@ -121,20 +120,3 @@ class RAM:
         else:
             Structure.PictureStoredInRam = False
 
-""" 
-    def CheckEveryArrayBit(self, TestEntity):
-        DataSize = 0
-        DataArray = 0
-        DataBits = 0
-        for i in range(len(self.data)):
-            if (self.dataoccupied[i]):
-                DataArray += len(self.data[i])
-                for j in range(len(self.data[i])):
-                    DataBits += len(self.data[i][j])
-                    for k in range (len(self.Data[i][j])):
-                        DataSize
-                DataSize = (DataArray * DataBits)
-        #print("There are", DataSize, "databits in the RAM")
-        return DataSize
-
- """

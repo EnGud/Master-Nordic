@@ -6,7 +6,7 @@ import numpy as np
 
 #Masks each channel given by the mask.
 def ApplyMask(PictureFG, X_Offset, PictureBG, Mask, TestEntity):
-    #White means draw, black means remove
+    #White (>0) means draw, black (0) means remove
     #Create PictureOut with the same size as PictureFG.
     PictureOut = np.zeros((len(PictureBG), 4), dtype=np.uint8)
 
@@ -36,7 +36,7 @@ def ApplyMask(PictureFG, X_Offset, PictureBG, Mask, TestEntity):
 
         
 
-#Check if the picture is RGB or RGBA. Returns the number of channels.
+#Check if the picture is RGB or RGBA. Returns the number of channels. Not used.
 def CheckNumbersOfChannels(Picture):
     if (len(Picture[0][0]) == 4):
         return 4

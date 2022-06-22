@@ -1,6 +1,4 @@
 #SCENE DESCRIPTOR
-
-
 import numpy as np
 
 class Empty():
@@ -14,14 +12,14 @@ def BuildScene(PictureFG, PictureBG, OperationsCounter):
     return 0
 
 
-
+#Array of scenes, for layering purposes
 class SceneItems:
     def __init__(self, Items, Size):
         self.Items = []*Items
         self.NumberOfItems = Size
         self.Picture = []
     
-    
+#Class for wrapping scene around picture
 class SceneDescriptor:
     #Generate Scene
     def __init__(Self, layer, ResolutionX, ResolutionY):
@@ -41,7 +39,7 @@ class SceneDescriptor:
 
    # class PictureInfo:
         #def __init__(Self):
-
+        #Additional scene operations info
         Self.PictureOffset = [0, 0]    
 
 

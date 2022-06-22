@@ -1,26 +1,18 @@
 import Scene_Descriptor
 import AlphaBlending
-import AlphaMasking
-import OperationsCounter
 import numpy as np
 from PIL import Image
 import CLUT
 
 #Setup
-
-
-
-
 ScreenResolutionX = 800
 ScreenResolutionY = 600
 
-#Use Scene_Descriptor to build the scene through a function
 
-
-
+#Build Info for MainMenu
+#Tips: always include mask for text. Match the mask with a blackout of the text.
 def MainMenuBuild(TestEntity):
-    #Todo: Error if picture is larger than screen for every layer/picture.
-    
+    #Use Scene_Descriptor to build the scene through a function
     MainMenuBG = Scene_Descriptor.SceneDescriptor(0, ScreenResolutionX, ScreenResolutionY)
 
     MainMenuBG.Exists = 1    
@@ -28,23 +20,22 @@ def MainMenuBuild(TestEntity):
     
 
     #set background to screen resolution
-    #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
-    #MainMenuBG.Picture = AlphaBlending.PutAlpha(np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield.bmp")), 120)
-    #MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield_1280_900.bmp")
+    #Save picture and CLUT in the class
     MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp")
     MainMenuBG.Picture = np.asarray(MainMenuBG.Picture.convert('RGBA'))
     MainMenuBG.PictureSize = [ScreenResolutionX, ScreenResolutionY]
     MainMenuBG.ApplyCLUT = False
     MainMenuBG.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
     #MainMenuBG.DrawOverBG = False
-
+    
+    #Background within defined screensize?
     if ((MainMenuBG.PictureSize[1] <= ScreenResolutionY) and (MainMenuBG.PictureSize[0]) <= ScreenResolutionX):
         pass
     else:
         print("Error! Picture is not the same size as the screen resolution. The background needs to fit the screen.")
         exit()
     
-
+    #Construct layer 1
     MainMenu1 = Scene_Descriptor.SceneDescriptor(1, 200, 100)
     MainMenu1.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
     MainMenu1.Picture = MainMenu1.Picture.convert('RGBA')
@@ -59,7 +50,7 @@ def MainMenuBuild(TestEntity):
     MainMenu1.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp"))
     
 
-
+    #Construct layer 2
     MainMenu2 = Scene_Descriptor.SceneDescriptor(2, 100, 100)
     MainMenu2.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp")
     MainMenu2.Picture = MainMenu2.Picture.convert('RGBA')
@@ -73,11 +64,10 @@ def MainMenuBuild(TestEntity):
 
     
 
-    
+    #Construct layer 3
     MainMenu3 = Scene_Descriptor.SceneDescriptor(3, 300, 100)
     MainMenu3.PictureSize = [300, 100]
 
-    #Paint.net er retarded.
     MainMenu3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp")
     MainMenu3.Picture = MainMenu3.Picture.convert('RGBA')
     MainMenu3.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu3.Picture), 120)
@@ -88,9 +78,10 @@ def MainMenuBuild(TestEntity):
 
     #MainMenu3.ApplyCLUT = True
     #MainMenu3.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
+    #End-entity
     MainMenuEnd = Scene_Descriptor.Empty
 
-
+    #Create scene array
     MainMenu = Scene_Descriptor.SceneItems
     MainMenu.Array = [MainMenuBG, MainMenu1, MainMenu2, MainMenu3]
 
@@ -106,7 +97,7 @@ def MainMenuBuild(TestEntity):
 
 
 
-
+#The following scene constructions should need no more explanation.
 
 
 
@@ -120,7 +111,6 @@ def SettingsMenuBuild(TestEntity):
     SettingsMenuBuild.Exists = 1
 
     #set background to screen resolution
-    #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
     SettingsMenuBuild.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SettingsBackground.bmp")
     SettingsMenuBuild.Picture = np.asarray(SettingsMenuBuild.Picture.convert('RGBA'))
     SettingsMenuBuild.PictureSize = [ScreenResolutionX, ScreenResolutionY]
@@ -203,9 +193,7 @@ def SettingsMenuBuild(TestEntity):
     
     return SettingsMenu, SettingsMenuBuild, SettingsMenuBuild1, SettingsMenuBuild2, SettingsMenuBuild3, SettingsMenuBuild4
 
-    #while structure.Next != None:
-    #Render the operations
-    #Go to next item in linked list
+
 
 
 
@@ -274,102 +262,5 @@ def SubSettingsMenuBuild(TestEntity):
     SubSettingsMenu.Array = [SubSettingsMenuBuild, SubSettingsMenuBuild1, SubSettingsMenuBuild2, SubSettingsMenuBuild3]
     
     return SubSettingsMenu, SubSettingsMenuBuild, SubSettingsMenuBuild1, SubSettingsMenuBuild2, SubSettingsMenuBuild3
-
-#Order some coffee
-def OrderCoffeeBuild():
-    #OrderCoffeeMenu.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
-    return 0
-
-def PushItToTheLimitDotJPG():
-    #PushItToTheLimit.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
-    return 0
-
-def TestingGrounds():
-    return 0
-
-def LargerScreen(TestEntity):
-    #Todo: Error if picture is larger than screen for every layer/picture.
-    
-    MainMenuBG = Scene_Descriptor.SceneDescriptor(0, 1280, 900)
-
-    MainMenuBG.Exists = 1    
-    #MainMenu1.Layer = 0
-    
-
-    #set background to screen resolution
-    #Check if Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp") is the same size as the screen resolution
-    #MainMenuBG.Picture = AlphaBlending.PutAlpha(np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield.bmp")), 120)
-    MainMenuBG.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Grassfield_1280_900.bmp")
-    MainMenuBG.Picture = np.asarray(MainMenuBG.Picture.convert('RGBA'))
-    MainMenuBG.PictureSize = [ScreenResolutionX, ScreenResolutionY]
-    MainMenuBG.ApplyCLUT = False
-    MainMenuBG.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
-    #MainMenuBG.DrawOverBG = False
-
-    if ((MainMenuBG.PictureSize[1] <= ScreenResolutionY) and (MainMenuBG.PictureSize[0]) <= ScreenResolutionX):
-        pass
-    else:
-        print("Error! Picture is not the same size as the screen resolution. The background needs to fit the screen.")
-        exit()
-    
-
-    MainMenu1 = Scene_Descriptor.SceneDescriptor(1, 200, 100)
-    MainMenu1.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp")
-    MainMenu1.Picture = MainMenu1.Picture.convert('RGBA')
-    MainMenu1.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu1.Picture), 200)
-    MainMenu1.PictureSize = [200, 100]
-    MainMenu1.PictureOffset = [600, 0]
-    MainMenu1.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
-
-
-    #MainMenu1.ApplyCLUT = True
-    MainMenu1.ApplyMask = True
-    MainMenu1.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Innstillinger_200_100.bmp"))
-    
-
-
-    MainMenu2 = Scene_Descriptor.SceneDescriptor(2, 100, 100)
-    MainMenu2.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp")
-    MainMenu2.Picture = MainMenu2.Picture.convert('RGBA')
-    MainMenu2.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu2.Picture), 255)
-    MainMenu2.PictureSize = [100, 100]
-
-
-    MainMenu2.ApplyMask = True
-    MainMenu2.PictureOffset = [700, 300]
-    MainMenu2.Mask = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Kaffe_100_100.bmp"))
-
-    
-
-    
-    MainMenu3 = Scene_Descriptor.SceneDescriptor(3, 300, 100)
-    MainMenu3.PictureSize = [300, 100]
-
-    #Paint.net er retarded.
-    MainMenu3.Picture = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Egne/Brukerguide_300_100.bmp")
-    MainMenu3.Picture = MainMenu3.Picture.convert('RGBA')
-    MainMenu3.Picture = AlphaBlending.PutAlpha(np.asarray(MainMenu3.Picture), 120)
-    
-    MainMenu3.PictureOffset = [0, 200]
-    MainMenu3.ApplyAlpha = True
-    MainMenu3.Picture = AlphaBlending.PutAlpha(MainMenu3.Picture, 120)
-
-    #MainMenu3.ApplyCLUT = True
-    #MainMenu3.CLUT = CLUT.GenerateTestCLUT(256, 256, 256)
-    MainMenuEnd = Scene_Descriptor.Empty
-
-
-    MainMenu = Scene_Descriptor.SceneItems
-    MainMenu.Array = [MainMenuBG, MainMenu1, MainMenu2, MainMenu3]
-
-    #Create a linked list
-    MainMenu3.Next = MainMenu2
-    MainMenu2.Next = MainMenu1
-    MainMenu1.Next = MainMenuEnd
-    #MainMenuBG.Next = MainMenuEnd
-    MainMenuEnd.Next = None
-
-    TestEntity.ScenesConstructed += 1
-    return MainMenu, MainMenuBG, MainMenu1, MainMenu2, MainMenu3
 
 

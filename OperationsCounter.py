@@ -2,9 +2,7 @@
 
 #Length is the y-length of the screen.
 
-from operator import length_hint
-
-
+#Just a lot of values for reading different values
 class OperationsCounter():
     def __init__(self, Length, Width):
 

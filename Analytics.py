@@ -3,16 +3,15 @@ import matplotlib.pyplot as plt
 
 
 
-#Alternative version
 #Input is a class which contain multiple attributes which are arrays. Create a histogram for each attribute, iterating over the arrays.
-def histogram(input_structure):
+def histogram(input_structure, Length):
         #create a histogram for each attribute
-        Histogram = [0]*600
+        Histogram = [0]*Length
         for i in range(len(input_structure)):
             #create a histogram for each attribute
             Histogram[i] = input_structure[i]
             
-        PlotHistogram(Histogram)
+        PlotHistogram(Histogram, Length)
         return Histogram
 
 
@@ -22,14 +21,14 @@ def histogram(input_structure):
   
 
   
-
-def PlotHistogram(Histogram):
-        plt.bar(range(600), Histogram)
+#Function to plot the histogram
+def PlotHistogram(Histogram, Length):
+        plt.bar(range(Length), Histogram)
         plt.show()
         #Save the histogram
         #plt.savefig("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Histogram/Test_Histogram.bmp")
 
-
+#Save every iteration-value into array
 def Testing(TestEntity, CurrentY):
 
 
@@ -40,7 +39,7 @@ def Testing(TestEntity, CurrentY):
     TestEntity.RAM_get_Array[CurrentY] = TestEntity.RAM_get
     TestEntity.RAM_Used_Bytes_Array[CurrentY] = TestEntity.RAM_Used_Bytes
 
-
+#Erase every valye
 def Clean(TestEntity):
     TestEntity.ApplyAlpha_Pixel = 0
     TestEntity.ApplyMask = 0
@@ -50,6 +49,7 @@ def Clean(TestEntity):
     TestEntity.RAM_Used = 0
     TestEntity.RAM_Used_Bytes = 0
 
+#Analyze by printing histogram of each array
 def Analyze(TestEntity):
     histogram(TestEntity.ApplyAlpha_Pixel_Array)
     histogram(TestEntity.ApplyMask_Pixel_Array)

@@ -1,25 +1,22 @@
 
-import Scene_Descriptor, AlphaBlending, AlphaMasking, OperationsCounter, Dynamic_RAM, Analytics, CLUT, Scene_Descriptor
+import AlphaBlending, AlphaMasking, OperationsCounter, Analytics, CLUT
 
 from PIL import Image
 import numpy as np
-import threading
 import Analytics
 import time
-#Limitation: Every picture needs an alpha
+
 
 
 TestEntity = OperationsCounter.OperationsCounter(600, 800)
 TestEntity.Length = 600 
 # Manual fix
-#Bærbar
 #BufferedPicture1 = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Lykke.bmp")
 #BufferedPicture2 = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Overlegg.bmp")
 #BufferedPicture3 = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Alternativ.bmp")
 #BufferedPicture4 = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Graas.bmp")
 #BufferedMask = Image.open("C:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Graas.bmp")
 
-#Stasjonær
 BufferedPicture1 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/MainMenuBackground.bmp").convert("RGBA"))
 BufferedPicture2 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SettingsBackground.bmp").convert("RGBA"))
 BufferedPicture3 = np.asarray(Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/SubSettingsBackground.bmp").convert("RGBA"))
@@ -37,6 +34,7 @@ TestEntity.FreeLine = [True]*800
 Histogram = [0]*600
 Time = [0] * 4
 
+#Just print background. For clean timing measurements.
 PassTest = True
 if PassTest == True:
     Output = np.zeros((600, 800, 4), dtype=np.uint8)
@@ -53,7 +51,7 @@ if PassTest == True:
 
     
 
-
+#Test Alpha
 AlphaTest = True
 if AlphaTest == True:
     AlphaedPictureOut = np.zeros((600, 800, 4), dtype=np.uint8)
@@ -82,7 +80,7 @@ if AlphaTest == True:
     AlphaedPictureOut.show()
 
 
-
+#Test Mask
 MaskTest = True
 if MaskTest == True:
     MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
@@ -109,8 +107,7 @@ if MaskTest == True:
 
 
 
-#CLUT stands for Color Look Up Table
-
+#Test CLUT
 CLUTTest = True
 if CLUTTest == True:
     TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
@@ -130,7 +127,7 @@ if CLUTTest == True:
     CLUTedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_CLUT.bmp")
 
 
-
+#Test both masking and alpha
 Both = False
 if Both == True:
     AlphaedPictureOut = np.zeros((600, 800, 4), dtype=np.uint8)
@@ -166,7 +163,7 @@ if Both == True:
     Analytics.PlotHistogram(Histogram)
     MaskedPicture.show()
 
-
+#Test all three operations
 All = False
 if All == True:
 
@@ -214,12 +211,3 @@ if All == True:
 
 
 Analytics.histogram(Time)
-
-print("Alpha vs Pass")
-print(Time[1]/Time[0])
-
-print("Mask vs Pass")
-print(Time[2]/Time[0])
-
-print("CLUT vs Pass")
-print(Time[0]/Time[3])
