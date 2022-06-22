@@ -58,8 +58,8 @@ class OperationsCounter():
 
         self.RAM_Used = 0
         self.RAM_Used_Array = [0]*Length
-        self.RAM_Used_Bits = 0
-        self.RAM_Used_Bits_Array = [0]*Length
+        self.RAM_Used_Bytes = 0
+        self.RAM_Used_Bytes_Array = [0]*Length
 
         #self.list =
 

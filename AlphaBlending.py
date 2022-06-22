@@ -111,6 +111,8 @@ def ApplyAlpha (Foreground, X_Offset, Operator, Background, TestEntity):
         #EndTime = time.time()
         #print(EndTime - StartTime)
         TestEntity.AlphaBlend += 1
+    else:
+        return
     return PictureOut
 
 

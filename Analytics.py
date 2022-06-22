@@ -38,8 +38,7 @@ def Testing(TestEntity, CurrentY):
     TestEntity.CLUT_Pixel_Array[CurrentY] = TestEntity.CLUT_Pixel_Applied
     TestEntity.RAM_put_Array[CurrentY] = TestEntity.RAM_put
     TestEntity.RAM_get_Array[CurrentY] = TestEntity.RAM_get
-    TestEntity.RAM_Used_Array[CurrentY] = TestEntity.RAM_Used
-    TestEntity.RAM_Used_Bits_Array[CurrentY] = TestEntity.RAM_Used_Bits
+    TestEntity.RAM_Used_Bytes_Array[CurrentY] = TestEntity.RAM_Used_Bytes
 
 
 def Clean(TestEntity):
@@ -49,7 +48,7 @@ def Clean(TestEntity):
     TestEntity.RAM_put = 0
     TestEntity.RAM_get = 0
     TestEntity.RAM_Used = 0
-    TestEntity.RAM_Used_Bits = 0
+    TestEntity.RAM_Used_Bytes = 0
 
 def Analyze(TestEntity):
     histogram(TestEntity.ApplyAlpha_Pixel_Array)
@@ -57,5 +56,4 @@ def Analyze(TestEntity):
     histogram(TestEntity.CLUT_Pixel_Array)
     histogram(TestEntity.RAM_put_Array)
     histogram(TestEntity.RAM_get_Array)
-    histogram(TestEntity.RAM_Used_Array)
-    histogram(TestEntity.RAM_Used_Bits_Array)
+    histogram(TestEntity.RAM_Used_Bytes_Array)

@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import threading
 import Analytics
+import time
 #Limitation: Every picture needs an alpha
 
 
@@ -34,25 +35,42 @@ BufferedMask1 = Image.open("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Bil
 TestEntity.FreeLine = [True]*800
 
 Histogram = [0]*600
+Time = [0] * 4
 
-AlphaTest = False
+PassTest = True
+if PassTest == True:
+    Output = np.zeros((600, 800, 4), dtype=np.uint8)
+    StartTime = time.time()
+    for CurrentY in range (BufferedPicture1.shape[0]):
+        for CurrentX in range (BufferedPicture1.shape[1]):
+            Output[CurrentY][CurrentX] = BufferedPicture1[CurrentY][CurrentX]
+
+    EndTime = time.time()
+    Time[0] = (EndTime - StartTime)
+    
+
+
+
+    
+
+
+AlphaTest = True
 if AlphaTest == True:
     AlphaedPictureOut = np.zeros((600, 800, 4), dtype=np.uint8)
 
     AlphaedPicture = AlphaBlending.check_alpha(BufferedPicture1, TestEntity)
     input()
-
+    StartTime = time.time()
     for CurrentY in range (len(BufferedPicture1)):
-        
         Picture = AlphaedPicture[CurrentY]
         PictureBG = BufferedPicture2[CurrentY]
-        #
-        print(CurrentY)
+
         
         AlphaedPictureOut[CurrentY] = AlphaBlending.ApplyAlpha(Picture, 0, "Over", PictureBG, TestEntity)
         #Histogram[i] = TestEntity.ApplyAlpha
         #TestEntity.ApplyAlpha = 0
-
+    EndTime = time.time()
+    Time[1] = (EndTime - StartTime)
     
         
 
@@ -60,46 +78,52 @@ if AlphaTest == True:
     AlphaedPictureOut = np.asarray(AlphaedPictureOut)
     AlphaedPictureOut = Image.fromarray(AlphaedPictureOut)
     AlphaedPictureOut.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_AlphaBlending.bmp")
-    Analytics.PlotHistogram(Histogram)
+    #Analytics.PlotHistogram(Histogram)
     AlphaedPictureOut.show()
 
 
 
-MaskTest = False
+MaskTest = True
 if MaskTest == True:
     MaskedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
 
+    StartTime = time.time()
     for CurrentY in range (len(BufferedPicture1)):
         LineMask = BufferedMask[CurrentY]
         LineBuff1 = BufferedPicture1[CurrentY]
         LineBuff2 = BufferedPicture2[CurrentY]
 
-        print(CurrentY)
         MaskedPicture[CurrentY] = AlphaMasking.ApplyMask(LineBuff1, 0, LineBuff2, LineMask, TestEntity)
         #Histogram[i] = TestEntity.ApplyMask
         #TestEntity.ApplyMask = 0
-    
+
+    EndTime = time.time()
+    Time[2] = (EndTime - StartTime)
+
+
     MaskedPicture = np.asarray(MaskedPicture)
     MaskedPicture = Image.fromarray(MaskedPicture)
     MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking.bmp")
-    Analytics.PlotHistogram(Histogram)
+    #Analytics.PlotHistogram(Histogram)
     MaskedPicture.show()
 
 
 
 #CLUT stands for Color Look Up Table
 
-CLUTTest = False
+CLUTTest = True
 if CLUTTest == True:
     TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
 
     CLUTedPicture = np.zeros((BufferedPicture1.shape[0], BufferedPicture1.shape[1], 4), dtype=np.uint8)
 
-
+    StartTime = time.time()
     #apply a CLUT on a picture by changing the colour value to the corresponding color value of the CLUT
     for CurrentY in range (len(BufferedPicture1)):
-        print(CurrentY)
         CLUTedPicture[CurrentY] = CLUT.ApplyCLUT(BufferedPicture1[CurrentY], TestCLUT, 0, TestEntity)
+
+    EndTime = time.time()
+    Time[3] = (EndTime - StartTime)
 
     CLUTedPicture = np.asarray(CLUTedPicture)
     CLUTedPicture = Image.fromarray(CLUTedPicture)
@@ -143,7 +167,7 @@ if Both == True:
     MaskedPicture.show()
 
 
-All = True
+All = False
 if All == True:
 
     TestCLUT = CLUT.GenerateTestCLUT(256, 256, 256)
@@ -187,3 +211,15 @@ if All == True:
     MaskedPicture.save("F:/Google Drive/Skule/Elsys 5. år/Nordic Master/Billeder/Test_Masking_And_Alpha_And_CLUT.bmp")
     Analytics.PlotHistogram(Histogram)
     MaskedPicture.show()
+
+
+Analytics.histogram(Time)
+
+print("Alpha vs Pass")
+print(Time[1]/Time[0])
+
+print("Mask vs Pass")
+print(Time[2]/Time[0])
+
+print("CLUT vs Pass")
+print(Time[0]/Time[3])

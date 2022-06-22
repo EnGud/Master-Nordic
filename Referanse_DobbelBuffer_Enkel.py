@@ -35,7 +35,7 @@ ScreenResolutionY = 600
 
 TargetBuffer = False
 TestEntity = OperationsCounter.OperationsCounter(ScreenResolutionX, ScreenResolutionY)
-StateMachineStatus = "SubSettingsMenus"
+StateMachineStatus = "MainMenu"
 RAM = Dynamic_RAM.RAM(16, TestEntity)
 
 #Main Menu
@@ -104,7 +104,7 @@ SubSettingsMenu1.Offset = [0,0]
 SubSettingsMenu2.Offset = [0,0]
 SubSettingsMenu3.Offset = [int(ScreenResolutionX/2 - 200), int(ScreenResolutionY/2 - 100)]
 
-
+TimeArray = [0]*3
 while(1):
 
     
@@ -122,14 +122,14 @@ while(1):
         RAM.clear("All", TestEntity)
         Out3 = Referanse_Funksjoner.Ref_Fill(Out2, MainMenuBG.Picture, FreeLine, RAM, TestEntity)
         RAM.clear("All", TestEntity)
-
         EndTime = time.time()
+        TimeArray[0] = (EndTime - StartTime)
         #print the time
+        StateMachineStatus = "SettingsMenu"
 
-        print (EndTime - StartTime)
 
-        Out3 = Image.fromarray(Out3)
-        Out3.show()
+        #Out3 = Image.fromarray(Out3)
+        #Out3.show()
 
         #Not important, but shows how Shadow buffers switch on a software level.
         if TargetBuffer == True:
@@ -137,7 +137,7 @@ while(1):
         if TargetBuffer == False:
             Buffer1 = Out3
         TargetBuffer != TargetBuffer
-        break
+        
     
     if StateMachineStatus == "SettingsMenu":
         FreeLine=np.full((ScreenResolutionY, ScreenResolutionX), True)
@@ -152,10 +152,12 @@ while(1):
         Out3, FreeLine = Referanse_Funksjoner.Ref_Mask(SettingsMenu4.Picture, SettingsMenu4.Offset, Out2, SettingsMenu4.Mask, FreeLine, RAM, TestEntity)
         RAM.clear("All", TestEntity)
         EndTime = time.time()
-        print (EndTime - StartTime)
+        TimeArray[1] = (EndTime - StartTime)
 
-        Out3 = Image.fromarray(Out3)
-        Out3.show()
+
+        #Out3 = Image.fromarray(Out3)
+        #Out3.show()
+        StateMachineStatus = "SubSettingsMenus"
 
     if StateMachineStatus == "SubSettingsMenus":
         FreeLine=np.full((ScreenResolutionY, ScreenResolutionX), True)
@@ -174,10 +176,14 @@ while(1):
 
 
         EndTime = time.time()
-        print (EndTime - StartTime)
+        TimeArray[2] = (EndTime - StartTime)
+
+
+        Analytics.histogram(TimeArray)
 
         Out3 = Image.fromarray(Out3)
         Out3.show()
+        break
 
 
     

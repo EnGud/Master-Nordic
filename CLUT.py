@@ -69,6 +69,7 @@ def ApplyCLUT(Picture, CLUT, X_Offset, TestEntity):
             if TestEntity.CurrentLayer != 0:
                 TestEntity.FreeLine[CurrentX + X_Offset] = False
             TestEntity.CLUT_Pixel_Applied += 1
+            
 
 
 
